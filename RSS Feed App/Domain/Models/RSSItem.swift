@@ -13,16 +13,21 @@ struct RSSItem: Identifiable {
     let description: String
     let imageUrl: URL?
     let link: URL
+    
+    init(title: String, description: String, imageUrl: URL?, link: URL) {
+        self.id = UUID()
+        self.title = title
+        self.description = description
+        self.imageUrl = imageUrl
+        self.link = link
+    }
 }
 
 extension RSSItem {
     static var mock: Self {
-        .init(
-            id: .init(),
-            title: "Title",
-            description: "Description",
-            imageUrl: nil,
-            link: URL(string: "https://example.com")!
-        )
+        .init(title: "Title",
+              description: "Description",
+              imageUrl: nil,
+              link: URL(string: "https://example.com")!)
     }
 }

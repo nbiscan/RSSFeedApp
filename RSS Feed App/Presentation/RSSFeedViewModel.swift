@@ -12,6 +12,9 @@ final class RSSFeedListViewModel: ObservableObject {
     var feeds: [RSSFeed] = []
     var newFeedURL: String = ""
     
+    var loading: Bool = false
+    var alertText: String?
+    
     private let addRSSFeedUseCase: AddRSSFeedUseCaseProtocol = AddRSSFeedUseCase()
     private let removeRSSFeedUseCase: RemoveRSSFeedUseCaseProtocol = RemoveRSSFeedUseCase()
     private let getRSSFeedsUseCase: GetRSSFeedsUseCaseProtocol = GetRSSFeedsUseCase()
@@ -20,21 +23,31 @@ final class RSSFeedListViewModel: ObservableObject {
     private let enableNotificationsUseCase: EnableNotificationsUseCaseProtocol = EnableNotificationsUseCase()
     
     func loadFeeds() {
+        loading = true
         feeds = getRSSFeedsUseCase.execute()
+        loading = false
     }
     
-    func addFeed() {
-        guard newFeedURL != "" else { return }
-        guard let url = URL(string: newFeedURL) else {
+    func addFeed() async {
+        guard newFeedURL != "", let url = URL(string: newFeedURL) else {
+            loading = false
             newFeedURL = ""
             return
         }
         
-        let result = addRSSFeedUseCase.execute(url: url)
+        loading = true
+        defer {
+            loading = false
+            withAnimation {
+                newFeedURL = ""
+            }
+        }
         
-        feeds.append(result)
-        withAnimation {
-            newFeedURL = ""
+        do {
+            let result = try await addRSSFeedUseCase.execute(url: url)
+            feeds.append(result)
+        } catch {
+            alertText = error.localizedDescription
         }
     }
     

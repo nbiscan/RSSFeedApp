@@ -8,7 +8,7 @@
 import Foundation
 
 protocol RSSFeedRepositoryProtocol {
-    func addFeed(url: URL) -> RSSFeed
+    func addFeed(url: URL) async throws -> RSSFeed
     func removeFeed(feedId: UUID)
     func getFeeds() -> [RSSFeed]
     func getFeedItems(feedId: UUID) -> [RSSItem]
@@ -18,20 +18,18 @@ protocol RSSFeedRepositoryProtocol {
 
 final class RSSFeedRepository: RSSFeedRepositoryProtocol {
     private var storage: [RSSFeed] = []
+    private let rssFeedService: RSSFeedServiceProtocol
+    
+    init(service: RSSFeedServiceProtocol) {
+        self.rssFeedService = service
+    }
     
     deinit {
         print("RSSFeedRepository deinit")
     }
     
-    func addFeed(url: URL) -> RSSFeed {
-        let newFeed: RSSFeed = .init(id: UUID(),
-                                     title: "",
-                                     description: "",
-                                     imageUrl: nil,
-                                     url: url,
-                                     isFavorite: false,
-                                     notificationsEnabled: false,
-                                     items: [])
+    func addFeed(url: URL) async throws -> RSSFeed {
+        let newFeed = try await rssFeedService.fetchFeed(from: url)
         storage.append(newFeed)
         
         return newFeed

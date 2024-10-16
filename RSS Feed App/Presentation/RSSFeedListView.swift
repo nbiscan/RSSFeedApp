@@ -9,29 +9,7 @@ import SwiftUI
 
 struct RSSFeedListView: View {
     @StateObject private var viewModel: RSSFeedListViewModel = .init()
-    
-    @ViewBuilder
-    private func feedView(feed: RSSFeed) -> some View {
-        HStack {
-            Text(feed.url.absoluteString)
-                .font(.headline)
-            
-            Spacer()
-            
-            Button(action: {
-                withAnimation(.spring()) {
-                    viewModel.toggleFavoriteFeed(with: feed.id)
-                }
-            }) {
-                Image(systemName: feed.isFavorite ? "star.fill" : "star")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 20, height: 20)
-                    .foregroundStyle(.gray)
-            }
-        }
-    }
-    
+        
     var body: some View {
         NavigationView {
             VStack {
@@ -40,8 +18,8 @@ struct RSSFeedListView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                     
                     Button(action: {
-                        withAnimation(.spring()) {
-                            viewModel.addFeed()
+                        Task {
+                            await viewModel.addFeed()
                         }
                     }) {
                         Text("Add")
@@ -56,8 +34,8 @@ struct RSSFeedListView: View {
                 
                 List {
                     ForEach(viewModel.feeds) { feed in
-                        NavigationLink(destination: RSSFeedItemsListView(feed: feed)) {
-                            feedView(feed: feed)
+                        NavigationLink(destination: RSSFeedDetailsView(feed: feed)) {
+                            RSSFeedCard(feed: feed)
                         }
                     }
                     .onDelete { indexSet in
@@ -68,6 +46,7 @@ struct RSSFeedListView: View {
                     }
                 }
             }
+            .isLoading(viewModel.loading)
             .onAppear {
                 withAnimation(.spring()) {
                     viewModel.loadFeeds()

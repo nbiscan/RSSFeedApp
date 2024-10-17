@@ -106,7 +106,7 @@ extension RSSFeedService: XMLParserDelegate {
             let rssItem = RSSItem(title: currentTitle,
                                   description: currentDescription,
                                   imageUrl: URL(string: currentImageUrl ?? ""),
-                                  link: URL(string: currentLink)!)
+                                  link: URL(string: currentLink.trimmingCharacters(in: .whitespacesAndNewlines))!)
             items.append(rssItem)
         }
     }

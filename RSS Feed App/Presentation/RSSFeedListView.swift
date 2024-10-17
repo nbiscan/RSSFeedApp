@@ -11,7 +11,7 @@ struct RSSFeedListView: View {
     @StateObject private var viewModel: RSSFeedListViewModel = .init()
         
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 HStack {
                     TextField("Enter RSS Feed URL", text: $viewModel.newFeedURL)
@@ -47,10 +47,8 @@ struct RSSFeedListView: View {
                 }
             }
             .isLoading(viewModel.loading)
-            .onAppear {
-                withAnimation(.spring()) {
-                    viewModel.loadFeeds()
-                }
+            .task {
+                await viewModel.loadFeeds()
             }
             .navigationTitle("RSS Feeds")
         }

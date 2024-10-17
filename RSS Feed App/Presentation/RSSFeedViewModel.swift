@@ -22,9 +22,15 @@ final class RSSFeedListViewModel: ObservableObject {
     private let toggleFavoriteFeedUseCase: ToggleFavoriteFeedUseCaseProtocol = ToggleFavoriteFeedUseCase()
     private let enableNotificationsUseCase: EnableNotificationsUseCaseProtocol = EnableNotificationsUseCase()
     
-    func loadFeeds() {
+    func loadFeeds() async {
         loading = true
         feeds = getRSSFeedsUseCase.execute()
+        
+        // only for testing
+        newFeedURL = "https://feeds.bbci.co.uk/news/world/rss.xml"
+        await addFeed()
+        //
+        
         loading = false
     }
     

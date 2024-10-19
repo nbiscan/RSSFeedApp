@@ -7,18 +7,18 @@
 
 import Foundation
 
-// Protocol Definitions
+// Protocols
 
 protocol GetRSSFeedItemsUseCaseProtocol {
-    func execute(feedId: UUID) -> [RSSItem]
+    func execute(feedURL: URL) async -> [RSSItem]
 }
 
 protocol ToggleFavoriteFeedUseCaseProtocol {
-    func execute(feedId: UUID)
+    func execute(feedURL: URL) async
 }
 
 protocol EnableNotificationsUseCaseProtocol {
-    func execute(feedId: UUID, enable: Bool)
+    func execute(feedURL: URL, enable: Bool) async
 }
 
 protocol AddRSSFeedUseCaseProtocol {
@@ -26,61 +26,60 @@ protocol AddRSSFeedUseCaseProtocol {
 }
 
 protocol RemoveRSSFeedUseCaseProtocol {
-    func execute(feedId: UUID)
+    func execute(feedURL: URL)
 }
 
 protocol GetRSSFeedsUseCaseProtocol {
-    func execute() -> [RSSFeed]
+    func execute() async -> [RSSFeed]
 }
-
 
 // Use Case Implementations
 
 final class GetRSSFeedsUseCase: GetRSSFeedsUseCaseProtocol {
     let repository: RSSFeedRepositoryProtocol = RSSFeedRepository(service: RSSFeedService())
 
-    func execute() -> [RSSFeed] {
-        repository.getFeeds()
+    func execute() async -> [RSSFeed] {
+        return await repository.getFeeds()
     }
 }
 
 final class RemoveRSSFeedUseCase: RemoveRSSFeedUseCaseProtocol {
     let repository: RSSFeedRepositoryProtocol = RSSFeedRepository(service: RSSFeedService())
 
-    func execute(feedId: UUID) {
-        repository.removeFeed(feedId: feedId)
+    func execute(feedURL: URL) {
+        print("Removing URL: \(feedURL.absoluteString)")
+        repository.removeFeed(url: feedURL)
     }
 }
 
 final class GetRSSFeedItemsUseCase: GetRSSFeedItemsUseCaseProtocol {
     let repository: RSSFeedRepositoryProtocol = RSSFeedRepository(service: RSSFeedService())
 
-    func execute(feedId: UUID) -> [RSSItem] {
-        repository.getFeedItems(feedId: feedId)
+    func execute(feedURL: URL) async -> [RSSItem] {
+        return await repository.getFeedItems(feedURL: feedURL)
     }
 }
 
-final class ToggleFavoriteFeedUseCase: ToggleFavoriteFeedUseCaseProtocol {
-    let repository: RSSFeedRepositoryProtocol = RSSFeedRepository(service: RSSFeedService())
-
-    func execute(feedId: UUID) {
-        repository.toggleFavoriteFeed(feedId: feedId)
-    }
-}
-
-final class EnableNotificationsUseCase: EnableNotificationsUseCaseProtocol {
-    let repository: RSSFeedRepositoryProtocol = RSSFeedRepository(service: RSSFeedService())
-
-    func execute(feedId: UUID, enable: Bool) {
-        repository.toggleNotifications(feedId: feedId, enable: enable)
-    }
-}
+//final class ToggleFavoriteFeedUseCase: ToggleFavoriteFeedUseCaseProtocol {
+//    let repository: RSSFeedRepositoryProtocol = RSSFeedRepository(service: RSSFeedService())
+//
+//    func execute(feedURL: URL) async { // Updated to async
+//        await repository.toggleFavoriteFeed(feedURL: feedURL) // Awaiting async method
+//    }
+//}
+//
+//final class EnableNotificationsUseCase: EnableNotificationsUseCaseProtocol {
+//    let repository: RSSFeedRepositoryProtocol = RSSFeedRepository(service: RSSFeedService())
+//
+//    func execute(feedURL: URL, enable: Bool) async { // Updated to async
+//        await repository.toggleNotifications(feedURL: feedURL, enable: enable) // Awaiting async method
+//    }
+//}
 
 final class AddRSSFeedUseCase: AddRSSFeedUseCaseProtocol {
     let repository: RSSFeedRepositoryProtocol = RSSFeedRepository(service: RSSFeedService())
     
     func execute(url: URL) async throws -> RSSFeed {
-        try await repository.addFeed(url: url)
+        return try await repository.addFeed(url: url)
     }
 }
-

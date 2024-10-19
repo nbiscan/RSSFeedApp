@@ -8,7 +8,6 @@
 import Foundation
 
 struct RSSFeed: Identifiable {
-    let id: UUID
     let title: String
     let description: String
     let imageUrl: URL?
@@ -16,12 +15,13 @@ struct RSSFeed: Identifiable {
     var isFavorite: Bool
     var notificationsEnabled: Bool
     var items: [RSSItem]
+    
+    var id: URL { url }
 }
 
 extension RSSFeed {
     static var mock: Self {
         .init(
-            id: .init(),
             title: "Mock Title",
             description: "Mock Description",
             imageUrl: nil,

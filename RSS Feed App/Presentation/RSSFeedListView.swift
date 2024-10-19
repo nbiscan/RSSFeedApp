@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct RSSFeedListView: View {
-    @StateObject private var viewModel: RSSFeedListViewModel = .init()
-        
+    @State private var viewModel: RSSFeedListViewModel = .init()
+    
     var body: some View {
         NavigationStack {
             VStack {
@@ -31,9 +31,9 @@ struct RSSFeedListView: View {
                     }
                 }
                 .padding(.horizontal)
-                
+                                
                 List {
-                    ForEach(viewModel.feeds) { feed in
+                    ForEach(viewModel.feeds, id: \.id) { feed in
                         NavigationLink(destination: RSSFeedDetailsView(feed: feed)) {
                             RSSFeedCard(feed: feed)
                         }
@@ -41,12 +41,20 @@ struct RSSFeedListView: View {
                     .onDelete { indexSet in
                         indexSet.forEach { index in
                             let feed = viewModel.feeds[index]
-                            viewModel.removeFeed(with: feed.id)
+                            viewModel.removeFeed(with: feed.url)
                         }
                     }
                 }
             }
-            .isLoading(viewModel.loading)
+            .alert(item: $viewModel.alertItem) { alertItem in
+                Alert(
+                    title: Text("Error"),
+                    message: Text(alertItem.message),
+                    dismissButton: .default(Text("OK")) {
+                        viewModel.alertItem = nil
+                    }
+                )
+            }
             .task {
                 await viewModel.loadFeeds()
             }

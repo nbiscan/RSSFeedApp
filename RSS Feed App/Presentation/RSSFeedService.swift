@@ -21,11 +21,16 @@ final class RSSFeedService: NSObject, RSSFeedServiceProtocol {
     
     private var feedTitle: String = ""
     private var feedDescription: String = ""
-    private var feedLink: String = ""
+    private var originalFeedURL: URL?
     
     private var parserCompletionHandler: ((RSSFeed) -> Void)?
     
     func fetchFeed(from url: URL) async throws -> RSSFeed {
+        items.removeAll()
+        feedTitle = ""
+        feedDescription = ""
+        originalFeedURL = url
+        
         return try await withCheckedThrowingContinuation { continuation in
             URLSession.shared.dataTask(with: url) { data, response, error in
                 guard let data = data, error == nil else {
@@ -87,11 +92,7 @@ extension RSSFeedService: XMLParserDelegate {
             }
         case "link":
             if parser.parserError == nil {
-                if feedLink.isEmpty {
-                    feedLink += string
-                } else {
-                    currentLink += string
-                }
+                currentLink += string
             }
         default:
             break
@@ -112,15 +113,14 @@ extension RSSFeedService: XMLParserDelegate {
     }
     
     func parserDidEndDocument(_ parser: XMLParser) {
-        let feed = RSSFeed(id: UUID(),
-                           title: feedTitle,
+        let feed = RSSFeed(title: feedTitle,
                            description: feedDescription,
                            imageUrl: nil,
-                           url: URL(string: feedLink)!,
+                           url: originalFeedURL ?? URL(string: "")!,
                            isFavorite: false,
                            notificationsEnabled: false,
                            items: items)
-        
+        print("Parsed feed: \(feed.url)")
         parserCompletionHandler?(feed)
     }
     

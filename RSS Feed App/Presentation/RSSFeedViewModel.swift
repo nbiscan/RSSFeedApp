@@ -13,29 +13,24 @@ final class RSSFeedListViewModel: ObservableObject {
     var newFeedURL: String = ""
     
     var loading: Bool = false
-    var alertText: String?
+    var alertItem: AlertItem?
     
     private let addRSSFeedUseCase: AddRSSFeedUseCaseProtocol = AddRSSFeedUseCase()
     private let removeRSSFeedUseCase: RemoveRSSFeedUseCaseProtocol = RemoveRSSFeedUseCase()
     private let getRSSFeedsUseCase: GetRSSFeedsUseCaseProtocol = GetRSSFeedsUseCase()
     private let getRSSFeedItemsUseCase: GetRSSFeedItemsUseCaseProtocol = GetRSSFeedItemsUseCase()
-    private let toggleFavoriteFeedUseCase: ToggleFavoriteFeedUseCaseProtocol = ToggleFavoriteFeedUseCase()
-    private let enableNotificationsUseCase: EnableNotificationsUseCaseProtocol = EnableNotificationsUseCase()
     
     func loadFeeds() async {
+        print(UserDefaults.standard.dictionaryRepresentation())
+        
         loading = true
-        feeds = getRSSFeedsUseCase.execute()
-        
-        // only for testing
-        newFeedURL = "https://feeds.bbci.co.uk/news/world/rss.xml"
-        await addFeed()
-        //
-        
+        feeds = await getRSSFeedsUseCase.execute()
         loading = false
     }
     
     func addFeed() async {
-        guard newFeedURL != "", let url = URL(string: newFeedURL) else {
+        guard newFeedURL != "",
+              let url = URL(string: newFeedURL) else {
             loading = false
             newFeedURL = ""
             return
@@ -53,21 +48,20 @@ final class RSSFeedListViewModel: ObservableObject {
             let result = try await addRSSFeedUseCase.execute(url: url)
             feeds.append(result)
         } catch {
-            alertText = error.localizedDescription
+            alertItem = AlertItem(message: error.localizedDescription)
         }
     }
     
-    func removeFeed(with id: UUID) {
-        removeRSSFeedUseCase.execute(feedId: id)
+    func removeFeed(with url: URL) {
+        print("Attempting to remove feed with URL: \(url)")
+        removeRSSFeedUseCase.execute(feedURL: url)
         
-        feeds.removeAll { $0.id == id }
+        feeds.removeAll { $0.url == url }
     }
-    
-    func toggleFavoriteFeed(with id: UUID) {
-        toggleFavoriteFeedUseCase.execute(feedId: id)
-        
-        if let index = feeds.firstIndex(where: { $0.id == id }) {
-            feeds[index].isFavorite.toggle()
-        }
-    }
+
+}
+
+struct AlertItem: Identifiable {
+    let id = UUID()
+    let message: String
 }

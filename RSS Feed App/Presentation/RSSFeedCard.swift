@@ -17,9 +17,6 @@ struct RSSFeedCard: View {
             
             Text(feed.description)
             
-            Text(feed.url.absoluteString)
-                .font(.footnote)
-            
             if let url = feed.imageUrl {
                 AsyncImage(url: url)
                     .frame(width: 100, height: 100)

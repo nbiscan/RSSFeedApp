@@ -19,17 +19,13 @@ struct RSSFeedDetailsView: View {
             Text(feed.description)
                 .font(.body)
                 .padding()
-            
-            Text(feed.url.absoluteString)
-            
+                        
             if let url = feed.imageUrl {
                 AsyncImage(url: url)
                     .frame(width: 100, height: 100)
             }
-            
-            Divider()
-            
-            List(feed.items) { item in
+                        
+            List(feed.items, id: \.id) { item in
                 NavigationLink(destination: WebView(url: item.link)) {
                     VStack(alignment: .leading) {
                         Text(item.title)

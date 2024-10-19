@@ -7,57 +7,74 @@
 
 import Foundation
 
+import Foundation
+
 protocol RSSFeedRepositoryProtocol {
     func addFeed(url: URL) async throws -> RSSFeed
-    func removeFeed(feedId: UUID)
-    func getFeeds() -> [RSSFeed]
-    func getFeedItems(feedId: UUID) -> [RSSItem]
-    func toggleFavoriteFeed(feedId: UUID)
-    func toggleNotifications(feedId: UUID, enable: Bool)
+    func removeFeed(url: URL)
+    func getFeeds() async -> [RSSFeed]
+    func getFeedItems(feedURL: URL) async -> [RSSItem]
+    //    func toggleFavoriteFeed(feedURL: URL) async
+    //    func toggleNotifications(feedURL: URL, enable: Bool) async
 }
 
 final class RSSFeedRepository: RSSFeedRepositoryProtocol {
-    private var storage: [RSSFeed] = []
     private let rssFeedService: RSSFeedServiceProtocol
-    
-    init(service: RSSFeedServiceProtocol) {
+    private let dataSource: RSSFeedDataSourceProtocol
+
+    init(service: RSSFeedServiceProtocol, dataSource: RSSFeedDataSourceProtocol = RSSFeedDataSource()) {
         self.rssFeedService = service
+        self.dataSource = dataSource
     }
-    
+
     deinit {
         print("RSSFeedRepository deinit")
     }
-    
+
     func addFeed(url: URL) async throws -> RSSFeed {
+        let currentURLs = dataSource.loadFeedURLs()
+        if currentURLs.contains(url) {
+            throw NSError(domain: "RSSFeedRepositoryError", code: 1, userInfo: [NSLocalizedDescriptionKey: "This URL has already been added."])
+        }
+
         let newFeed = try await rssFeedService.fetchFeed(from: url)
-        storage.append(newFeed)
-        
+        var updatedURLs = currentURLs
+        updatedURLs.append(url)
+        dataSource.saveFeedURLs(updatedURLs)
+
         return newFeed
     }
-    
-    func removeFeed(feedId: UUID) {
-        storage.removeAll(where: { $0.id == feedId })
+
+    func removeFeed(url: URL) {
+        dataSource.removeFeedURL(url)
     }
-    
-    func getFeeds() -> [RSSFeed] {
-        storage
-    }
-    
-    func getFeedItems(feedId: UUID) -> [RSSItem] {
-        storage.first(where: { $0.id == feedId })?.items ?? []
-    }
-    
-    func toggleFavoriteFeed(feedId: UUID) {
-        let feedIndex: Int? = storage.firstIndex(where: { $0.id == feedId })
+
+    func getFeeds() async -> [RSSFeed] {
+        let feedURLs = dataSource.loadFeedURLs()
+        var feeds: [RSSFeed] = []
         
-        if let feedIndex {
-            storage[feedIndex].isFavorite.toggle()
+        for url in feedURLs {
+            do {
+                let feed = try await rssFeedService.fetchFeed(from: url)
+                print("Fetched feed: \(feed.url)")
+                
+                if !feeds.contains(where: { $0.url == feed.url }) {
+                    feeds.append(feed)
+                } else {
+                    print("Duplicate feed found: \(feed.url)")
+                }
+            } catch {
+                print("Failed to fetch feed from URL: \(url), error: \(error)")
+            }
         }
+        
+        return feeds
     }
-    
-    func toggleNotifications(feedId: UUID, enable: Bool) {
-        if let index = storage.firstIndex(where: { $0.id == feedId }) {
-            storage[index].notificationsEnabled = enable
+
+    func getFeedItems(feedURL: URL) async -> [RSSItem] {
+        guard let feed = await getFeeds().first(where: { $0.url == feedURL }) else {
+            return []
         }
+        return feed.items
     }
 }

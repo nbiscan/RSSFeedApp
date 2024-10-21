@@ -15,11 +15,6 @@ struct ContentView: View {
                     Label("Feeds", systemImage: "list.bullet")
                 }
             
-            FavoritesView()
-                .tabItem {
-                    Label("Favorites", systemImage: "star.fill")
-                }
-            
             SettingsView()
                 .tabItem {
                     Label("Settings", systemImage: "gearshape.fill")

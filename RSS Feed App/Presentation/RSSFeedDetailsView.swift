@@ -46,7 +46,6 @@ struct RSSFeedDetailsView: View {
                 }
             }
         }
-        .navigationTitle(feed.title)
         .navigationBarTitleDisplayMode(.inline)
     }
 }

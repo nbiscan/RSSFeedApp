@@ -9,11 +9,16 @@ import SwiftUI
 
 @Observable
 final class RSSFeedListViewModel: ObservableObject {
-    var feeds: [RSSFeed] = []
+    private var feeds: [RSSFeed] = []
     var newFeedURL: String = ""
+    var isShowingFavorites: Bool = false
     
     var loading: Bool = false
     var alertItem: AlertItem?
+    
+    var filteredFeeds: [RSSFeed] {
+        isShowingFavorites ? feeds.filter(\.isFavorite) : feeds
+    }
     
     private let addRSSFeedUseCase: AddRSSFeedUseCaseProtocol = AddRSSFeedUseCase()
     private let removeRSSFeedUseCase: RemoveRSSFeedUseCaseProtocol = RemoveRSSFeedUseCase()
@@ -39,7 +44,7 @@ final class RSSFeedListViewModel: ObservableObject {
         loading = true
         defer {
             loading = false
-            withAnimation {
+            withAnimation(.smooth) {
                 newFeedURL = ""
             }
         }
@@ -57,6 +62,10 @@ final class RSSFeedListViewModel: ObservableObject {
         removeRSSFeedUseCase.execute(feedURL: url)
         
         feeds.removeAll { $0.url == url }
+    }
+    
+    func toggleFavorite(with url: URL) {
+        
     }
 
 }

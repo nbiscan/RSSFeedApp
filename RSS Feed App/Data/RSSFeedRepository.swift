@@ -34,7 +34,9 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
     func addFeed(url: URL) async throws -> RSSFeed {
         let currentURLs = dataSource.loadFeedURLs()
         if currentURLs.contains(url) {
-            throw NSError(domain: "RSSFeedRepositoryError", code: 1, userInfo: [NSLocalizedDescriptionKey: "This URL has already been added."])
+            throw NSError(domain: "RSSFeedRepositoryError",
+                          code: 1,
+                          userInfo: [NSLocalizedDescriptionKey: "This URL has already been added."])
         }
 
         let newFeed = try await rssFeedService.fetchFeed(from: url)

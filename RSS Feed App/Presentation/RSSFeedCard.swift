@@ -11,7 +11,7 @@ struct RSSFeedCard: View {
     let feed: RSSFeed
     
     var body: some View {
-        VStack {
+        VStack(alignment: .leading) {
             Text(feed.title)
                 .font(.headline)
             
@@ -20,14 +20,6 @@ struct RSSFeedCard: View {
             if let url = feed.imageUrl {
                 AsyncImage(url: url)
                     .frame(width: 100, height: 100)
-            }
-            
-            HStack {
-                Image(systemName: feed.isFavorite ? "star.fill" : "star")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 20, height: 20)
-                    .foregroundStyle(.gray)
             }
         }
         .padding()

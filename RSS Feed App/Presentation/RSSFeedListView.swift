@@ -13,34 +13,26 @@ struct RSSFeedListView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                HStack {
-                    TextField("Enter RSS Feed URL", text: $viewModel.newFeedURL)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                    
-                    Button(action: {
-                        Task {
-                            await viewModel.addFeed()
-                        }
-                    }) {
-                        Text("Add")
-                            .padding(.horizontal)
-                            .padding(.vertical, 8)
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(8)
-                    }
-                }
-                .padding(.horizontal)
-                                
+                header
+                
                 List {
-                    ForEach(viewModel.feeds, id: \.id) { feed in
+                    ForEach(viewModel.filteredFeeds, id: \.id) { feed in
                         NavigationLink(destination: RSSFeedDetailsView(feed: feed)) {
                             RSSFeedCard(feed: feed)
+                                .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                                    Button {
+                                        viewModel.toggleFavorite(with: feed.url)
+                                    } label: {
+                                        Label(feed.isFavorite ? "Unfavorite" : "Favorite",
+                                              systemImage: feed.isFavorite ? "star.fill" : "star")
+                                    }
+                                    .tint(feed.isFavorite ? .yellow : .blue)
+                                }
                         }
                     }
                     .onDelete { indexSet in
                         indexSet.forEach { index in
-                            let feed = viewModel.feeds[index]
+                            let feed = viewModel.filteredFeeds[index]
                             viewModel.removeFeed(with: feed.url)
                         }
                     }
@@ -60,6 +52,41 @@ struct RSSFeedListView: View {
             }
             .navigationTitle("RSS Feeds")
         }
+    }
+    
+    @ViewBuilder
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            HStack {
+                TextField("Enter RSS Feed URL", text: $viewModel.newFeedURL)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                
+                Button(action: {
+                    Task {
+                        await viewModel.addFeed()
+                    }
+                }) {
+                    Text("Add")
+                        .padding(.horizontal)
+                        .padding(.vertical, 8)
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                }
+            }
+            
+            Button(viewModel.isShowingFavorites ? "Show All" : "Show Favorites") {
+                withAnimation(.smooth) {
+                    viewModel.isShowingFavorites.toggle()
+                }
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 8)
+            .background(Color.green)
+            .foregroundColor(.white)
+            .cornerRadius(8)
+        }
+        .padding(.horizontal)
     }
 }
 #Preview {

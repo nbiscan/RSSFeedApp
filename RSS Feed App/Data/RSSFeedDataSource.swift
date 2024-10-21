@@ -12,17 +12,20 @@ protocol RSSFeedDataSourceProtocol {
     func loadFeedURLs() -> [URL]
     func removeFeedURL(_ url: URL)
     
-    // Methods for handling favorites
     func saveFavoriteURLs(_ urls: [URL])
     func loadFavoriteURLs() -> [URL]
     func addFavoriteURL(_ url: URL)
     func removeFavoriteURL(_ url: URL)
     func isFavoriteURL(_ url: URL) -> Bool
+    
+    func saveNotificationSettings(for url: URL, isEnabled: Bool)
+    func loadNotificationSettings(for url: URL) -> Bool
 }
 
 final class RSSFeedDataSource: RSSFeedDataSourceProtocol {
     private let userDefaultsKey = "savedFeedURLs"
     private let favoritesKey = "favoriteFeedURLs"
+    private let notificationsKey = "notificationFeedURLs"
     private let userDefaults = UserDefaults.standard
     
     func saveFeedURLs(_ urls: [URL]) {
@@ -71,5 +74,16 @@ final class RSSFeedDataSource: RSSFeedDataSourceProtocol {
     
     func isFavoriteURL(_ url: URL) -> Bool {
         return loadFavoriteURLs().contains(url)
+    }
+    
+    func saveNotificationSettings(for url: URL, isEnabled: Bool) {
+        var notificationsSettings = UserDefaults.standard.dictionary(forKey: notificationsKey) as? [String: Bool] ?? [:]
+        notificationsSettings[url.absoluteString] = isEnabled
+        UserDefaults.standard.set(notificationsSettings, forKey: notificationsKey)
+    }
+    
+    func loadNotificationSettings(for url: URL) -> Bool {
+        let notificationsSettings = UserDefaults.standard.dictionary(forKey: notificationsKey) as? [String: Bool] ?? [:]
+        return notificationsSettings[url.absoluteString] ?? false
     }
 }

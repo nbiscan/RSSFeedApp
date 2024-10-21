@@ -60,14 +60,14 @@ final class GetRSSFeedItemsUseCase: GetRSSFeedItemsUseCaseProtocol {
     }
 }
 
-//final class ToggleFavoriteFeedUseCase: ToggleFavoriteFeedUseCaseProtocol {
-//    let repository: RSSFeedRepositoryProtocol = RSSFeedRepository(service: RSSFeedService())
-//
-//    func execute(feedURL: URL) async { // Updated to async
-//        await repository.toggleFavoriteFeed(feedURL: feedURL) // Awaiting async method
-//    }
-//}
-//
+final class ToggleFavoriteFeedUseCase: ToggleFavoriteFeedUseCaseProtocol {
+    let repository: RSSFeedRepositoryProtocol = RSSFeedRepository(service: RSSFeedService())
+
+    func execute(feedURL: URL) async {
+        await repository.toggleFavoriteFeed(feedURL: feedURL)
+    }
+}
+
 //final class EnableNotificationsUseCase: EnableNotificationsUseCaseProtocol {
 //    let repository: RSSFeedRepositoryProtocol = RSSFeedRepository(service: RSSFeedService())
 //

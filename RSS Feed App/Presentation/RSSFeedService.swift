@@ -117,7 +117,7 @@ extension RSSFeedService: XMLParserDelegate {
                            description: feedDescription,
                            imageUrl: nil,
                            url: originalFeedURL ?? URL(string: "")!,
-                           isFavorite: [true, false].randomElement() ?? false,
+                           isFavorite: false,
                            notificationsEnabled: false,
                            items: items)
         print("Parsed feed: \(feed.url)")

@@ -14,8 +14,8 @@ protocol RSSFeedRepositoryProtocol {
     func removeFeed(url: URL)
     func getFeeds() async -> [RSSFeed]
     func getFeedItems(feedURL: URL) async -> [RSSItem]
-    //    func toggleFavoriteFeed(feedURL: URL) async
-    //    func toggleNotifications(feedURL: URL, enable: Bool) async
+    func toggleFavoriteFeed(feedURL: URL) async
+    func toggleNotifications(feedURL: URL, enable: Bool) async
 }
 
 final class RSSFeedRepository: RSSFeedRepositoryProtocol {
@@ -32,22 +32,28 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
     }
 
     func addFeed(url: URL) async throws -> RSSFeed {
+        let normalizedURL = normalizeURL(url)
+
         let currentURLs = dataSource.loadFeedURLs()
-        if currentURLs.contains(url) {
+        if currentURLs.contains(normalizedURL) {
             throw NSError(domain: "RSSFeedRepositoryError",
                           code: 1,
                           userInfo: [NSLocalizedDescriptionKey: "This URL has already been added."])
         }
 
-        let newFeed = try await rssFeedService.fetchFeed(from: url)
+        let newFeed = try await rssFeedService.fetchFeed(from: normalizedURL)
         var updatedURLs = currentURLs
-        updatedURLs.append(url)
+        updatedURLs.append(normalizedURL)
         dataSource.saveFeedURLs(updatedURLs)
 
         return newFeed
     }
 
     func removeFeed(url: URL) {
+        if dataSource.isFavoriteURL(url) {
+            dataSource.removeFavoriteURL(url)
+        }
+
         dataSource.removeFeedURL(url)
     }
 
@@ -60,11 +66,19 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
                 let feed = try await rssFeedService.fetchFeed(from: url)
                 print("Fetched feed: \(feed.url)")
                 
-                if !feeds.contains(where: { $0.url == feed.url }) {
-                    feeds.append(feed)
-                } else {
-                    print("Duplicate feed found: \(feed.url)")
-                }
+                let isFavorite = dataSource.isFavoriteURL(feed.url)
+                
+                let updatedFeed = RSSFeed(
+                    title: feed.title,
+                    description: feed.description,
+                    imageUrl: feed.imageUrl,
+                    url: feed.url,
+                    isFavorite: isFavorite,
+                    notificationsEnabled: feed.notificationsEnabled,
+                    items: feed.items
+                )
+                
+                feeds.append(updatedFeed)
             } catch {
                 print("Failed to fetch feed from URL: \(url), error: \(error)")
             }
@@ -78,5 +92,25 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
             return []
         }
         return feed.items
+    }
+    
+    func toggleFavoriteFeed(feedURL: URL) async {
+        if dataSource.isFavoriteURL(feedURL) {
+            dataSource.removeFavoriteURL(feedURL)
+        } else {
+            dataSource.addFavoriteURL(feedURL)
+        }
+    }
+    
+    func toggleNotifications(feedURL: URL, enable: Bool) async {
+        dataSource.saveNotificationSettings(for: feedURL, isEnabled: enable)
+    }
+    
+    private func normalizeURL(_ url: URL) -> URL {
+        guard url.scheme == nil else { return url }
+        
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        components?.scheme = "https"
+        return components?.url ?? url
     }
 }

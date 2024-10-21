@@ -24,6 +24,7 @@ final class RSSFeedListViewModel: ObservableObject {
     private let removeRSSFeedUseCase: RemoveRSSFeedUseCaseProtocol = RemoveRSSFeedUseCase()
     private let getRSSFeedsUseCase: GetRSSFeedsUseCaseProtocol = GetRSSFeedsUseCase()
     private let getRSSFeedItemsUseCase: GetRSSFeedItemsUseCaseProtocol = GetRSSFeedItemsUseCase()
+    private let toggleFavoriteFeedUseCase: ToggleFavoriteFeedUseCaseProtocol = ToggleFavoriteFeedUseCase()
     
     func loadFeeds() async {
         print(UserDefaults.standard.dictionaryRepresentation())
@@ -58,16 +59,23 @@ final class RSSFeedListViewModel: ObservableObject {
     }
     
     func removeFeed(with url: URL) {
-        print("Attempting to remove feed with URL: \(url)")
         removeRSSFeedUseCase.execute(feedURL: url)
-        
         feeds.removeAll { $0.url == url }
     }
     
     func toggleFavorite(with url: URL) {
+        guard let index = feeds.firstIndex(where: { $0.url == url }) else { return }
+        let feed = feeds[index]
         
+        Task {
+            do {
+                await toggleFavoriteFeedUseCase.execute(feedURL: url)
+                feeds[index].isFavorite.toggle()
+            } catch {
+                alertItem = AlertItem(message: error.localizedDescription)
+            }
+        }
     }
-
 }
 
 struct AlertItem: Identifiable {

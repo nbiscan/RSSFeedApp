@@ -7,8 +7,6 @@
 
 import Foundation
 
-import Foundation
-
 protocol RSSFeedRepositoryProtocol {
     func addFeed(url: URL) async throws -> RSSFeed
     func removeFeed(url: URL)
@@ -17,7 +15,6 @@ protocol RSSFeedRepositoryProtocol {
     func toggleFavoriteFeed(feedURL: URL) async
     func toggleNotifications(feedURL: URL, enable: Bool) async
 }
-
 final class RSSFeedRepository: RSSFeedRepositoryProtocol {
     private let rssFeedService: RSSFeedServiceProtocol
     private let dataSource: RSSFeedDataSourceProtocol
@@ -67,6 +64,7 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
                 print("Fetched feed: \(feed.url)")
                 
                 let isFavorite = dataSource.isFavoriteURL(feed.url)
+                let notificationsEnabled = dataSource.loadNotificationSettings(for: feed.url)
                 
                 let updatedFeed = RSSFeed(
                     title: feed.title,
@@ -74,7 +72,7 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
                     imageUrl: feed.imageUrl,
                     url: feed.url,
                     isFavorite: isFavorite,
-                    notificationsEnabled: feed.notificationsEnabled,
+                    notificationsEnabled: notificationsEnabled,
                     items: feed.items
                 )
                 

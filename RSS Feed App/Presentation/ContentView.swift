@@ -32,15 +32,6 @@ struct FavoritesView: View {
     }
 }
 
-struct SettingsView: View {
-    var body: some View {
-        NavigationView {
-            Text("Settings")
-                .navigationTitle("Settings")
-        }
-    }
-}
-
 #Preview {
     ContentView()
 }

@@ -25,6 +25,10 @@ protocol AddRSSFeedUseCaseProtocol {
     func execute(url: URL) async throws -> RSSFeed
 }
 
+protocol ToggleNotificationsUseCaseProtocol {
+    func execute(feedURL: URL, enable: Bool) async
+}
+
 protocol RemoveRSSFeedUseCaseProtocol {
     func execute(feedURL: URL)
 }
@@ -68,13 +72,13 @@ final class ToggleFavoriteFeedUseCase: ToggleFavoriteFeedUseCaseProtocol {
     }
 }
 
-//final class EnableNotificationsUseCase: EnableNotificationsUseCaseProtocol {
-//    let repository: RSSFeedRepositoryProtocol = RSSFeedRepository(service: RSSFeedService())
-//
-//    func execute(feedURL: URL, enable: Bool) async { // Updated to async
-//        await repository.toggleNotifications(feedURL: feedURL, enable: enable) // Awaiting async method
-//    }
-//}
+final class ToggleNotificationsUseCase: ToggleNotificationsUseCaseProtocol {
+    let repository: RSSFeedRepositoryProtocol = RSSFeedRepository(service: RSSFeedService())
+
+    func execute(feedURL: URL, enable: Bool) async {
+        await repository.toggleNotifications(feedURL: feedURL, enable: enable)
+    }
+}
 
 final class AddRSSFeedUseCase: AddRSSFeedUseCaseProtocol {
     let repository: RSSFeedRepositoryProtocol = RSSFeedRepository(service: RSSFeedService())

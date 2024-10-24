@@ -6,23 +6,49 @@
 //
 
 import SwiftUI
-
 struct RSSFeedCard: View {
     let feed: RSSFeed
     
     var body: some View {
-        VStack(alignment: .leading) {
-            Text(feed.title)
-                .font(.headline)
-            
-            Text(feed.description)
-            
-            if let url = feed.imageUrl {
-                AsyncImage(url: url)
-                    .frame(width: 100, height: 100)
+        HStack(spacing: 16) {
+            // Image block
+            if let imageUrl = feed.imageUrl {
+                AsyncImage(url: imageUrl) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 70, height: 70)
+                        .cornerRadius(8)
+                        .clipped()
+                } placeholder: {
+                    ProgressView()
+                        .frame(width: 70, height: 70)
+                }
+            } else {
+                Image(systemName: "photo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 70, height: 70)
+                    .foregroundColor(.gray)
+                    .background(Color(.systemGray5))
+                    .cornerRadius(8)
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(feed.title)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                    .lineLimit(2)
+
+                Text(feed.description)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .lineLimit(3)
             }
         }
         .padding()
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(12)
     }
 }
 

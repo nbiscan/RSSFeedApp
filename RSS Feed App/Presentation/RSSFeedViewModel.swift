@@ -45,7 +45,7 @@ final class RSSFeedListViewModel: ObservableObject {
         loading = true
         defer {
             loading = false
-            withAnimation(.smooth) {
+            withAnimation(.default) {
                 newFeedURL = ""
             }
         }
@@ -60,20 +60,21 @@ final class RSSFeedListViewModel: ObservableObject {
     
     func removeFeed(with url: URL) {
         removeRSSFeedUseCase.execute(feedURL: url)
-        feeds.removeAll { $0.url == url }
+        
+        withAnimation(.default) {
+            feeds.removeAll { $0.url == url }
+        }
     }
     
     func toggleFavorite(with url: URL) {
         guard let index = feeds.firstIndex(where: { $0.url == url }) else { return }
-        let feed = feeds[index]
         
         Task {
-            do {
-                await toggleFavoriteFeedUseCase.execute(feedURL: url)
-                feeds[index].isFavorite.toggle()
-            } catch {
-                alertItem = AlertItem(message: error.localizedDescription)
-            }
+            await toggleFavoriteFeedUseCase.execute(feedURL: url)
+        }
+        
+        withAnimation(.default) {
+            feeds[index].isFavorite.toggle()
         }
     }
 }

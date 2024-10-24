@@ -10,40 +10,41 @@ import Foundation
 protocol RSSFeedServiceProtocol {
     func fetchFeed(from url: URL) async throws -> RSSFeed
 }
-
 final class RSSFeedService: NSObject, RSSFeedServiceProtocol {
     private var currentElement: String = ""
     private var currentTitle: String = ""
     private var currentDescription: String = ""
     private var currentLink: String = ""
     private var currentImageUrl: String?
+    private var channelImageUrl: String?
     private var items: [RSSItem] = []
-    
+
     private var feedTitle: String = ""
     private var feedDescription: String = ""
     private var originalFeedURL: URL?
-    
+
     private var parserCompletionHandler: ((RSSFeed) -> Void)?
-    
+
     func fetchFeed(from url: URL) async throws -> RSSFeed {
         items.removeAll()
         feedTitle = ""
         feedDescription = ""
+        channelImageUrl = nil
         originalFeedURL = url
-        
+
         return try await withCheckedThrowingContinuation { continuation in
             URLSession.shared.dataTask(with: url) { data, response, error in
                 guard let data = data, error == nil else {
                     continuation.resume(throwing: error ?? URLError(.badServerResponse))
                     return
                 }
-                
+
                 let parser = XMLParser(data: data)
                 parser.delegate = self
                 self.parserCompletionHandler = { rssFeed in
                     continuation.resume(returning: rssFeed)
                 }
-                
+
                 parser.parse()
             }.resume()
         }
@@ -57,21 +58,25 @@ extension RSSFeedService: XMLParserDelegate {
                 qualifiedName qName: String?,
                 attributes attributeDict: [String : String] = [:]) {
         currentElement = elementName
-        
+
         if elementName == "item" {
             currentTitle = ""
             currentDescription = ""
             currentLink = ""
             currentImageUrl = nil
         }
-        
+
+        if elementName == "image" {
+            currentImageUrl = nil
+        }
+
         if elementName == "enclosure",
            let url = attributeDict["url"],
            attributeDict["type"]?.hasPrefix("image") == true {
             currentImageUrl = url
         }
     }
-    
+
     func parser(_ parser: XMLParser, foundCharacters string: String) {
         switch currentElement {
         case "title":
@@ -94,11 +99,15 @@ extension RSSFeedService: XMLParserDelegate {
             if parser.parserError == nil {
                 currentLink += string
             }
+        case "url":
+            if parser.parserError == nil, currentImageUrl == nil {
+                currentImageUrl = string
+            }
         default:
             break
         }
     }
-    
+
     func parser(_ parser: XMLParser,
                 didEndElement elementName: String,
                 namespaceURI: String?,
@@ -110,20 +119,25 @@ extension RSSFeedService: XMLParserDelegate {
                                   link: URL(string: currentLink.trimmingCharacters(in: .whitespacesAndNewlines))!)
             items.append(rssItem)
         }
+
+        if elementName == "image" {
+            channelImageUrl = currentImageUrl
+        }
     }
-    
+
     func parserDidEndDocument(_ parser: XMLParser) {
         let feed = RSSFeed(title: feedTitle,
                            description: feedDescription,
-                           imageUrl: nil,
+                           imageUrl: URL(string: channelImageUrl ?? ""),
                            url: originalFeedURL ?? URL(string: "")!,
                            isFavorite: false,
                            notificationsEnabled: false,
                            items: items)
+
         print("Parsed feed: \(feed.url)")
         parserCompletionHandler?(feed)
     }
-    
+
     func parser(_ parser: XMLParser, parseErrorOccurred parseError: Error) {
         print("Failed to parse XML: \(parseError)")
     }

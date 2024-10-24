@@ -76,7 +76,7 @@ struct RSSFeedListView: View {
             }
             
             Button(viewModel.isShowingFavorites ? "Show All" : "Show Favorites") {
-                withAnimation(.smooth) {
+                withAnimation(.default) {
                     viewModel.isShowingFavorites.toggle()
                 }
             }

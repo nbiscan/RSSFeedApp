@@ -12,12 +12,23 @@ final class RSSFeedListViewModel: ObservableObject {
     private var feeds: [RSSListItem] = []
     var newFeedURL: String = ""
     var isShowingFavorites: Bool = false
+    var searchText: String = ""
     
-    var loading: Bool = true
+    var loading: Bool = true {
+        didSet {
+            print(loading.description) // for testing
+        }
+    }
     var alertItem: AlertItem?
     
     var filteredFeeds: [RSSListItem] {
-        isShowingFavorites ? feeds.filter(\.isFavorite) : feeds
+        let filteredItems = isShowingFavorites ? feeds.filter(\.isFavorite) : feeds
+        
+        if searchText.isEmpty {
+            return filteredItems
+        } else {
+            return filteredItems.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
+        }
     }
     
     var isAddingDisabled: Bool {

@@ -21,7 +21,11 @@ struct RSSFeedListView: View {
                     if viewModel.isShowingFavorites {
                         favoritesEmptyState
                     } else {
-                        emptyState
+                        if !viewModel.hasFeeds {
+                            emptyState
+                        } else {
+                            noSearchResultsState
+                        }
                     }
                     
                     Spacer()
@@ -51,6 +55,7 @@ struct RSSFeedListView: View {
         VStack(alignment: .leading, spacing: 20) {
             HStack {
                 TextField("Enter RSS Feed URL", text: $viewModel.newFeedURL)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
                     .keyboardType(.URL)
                 
                 Button(action: {
@@ -70,16 +75,22 @@ struct RSSFeedListView: View {
             }
             
             if viewModel.hasFeeds {
-                Button(viewModel.isShowingFavorites ? "Show All" : "Show Favorites") {
-                    withAnimation(.default) {
-                        viewModel.isShowingFavorites.toggle()
+                HStack {
+                    Button(viewModel.isShowingFavorites ? "Show All" : "Show Favorites") {
+                        withAnimation(.default) {
+                            viewModel.isShowingFavorites.toggle()
+                        }
                     }
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                    .background(Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                    
+                    TextField("Search Feeds", text: $viewModel.searchText)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal)
                 }
-                .padding(.horizontal)
-                .padding(.vertical, 8)
-                .background(Color.green)
-                .foregroundColor(.white)
-                .cornerRadius(8)
             }
         }
         .padding(.horizontal)
@@ -154,6 +165,30 @@ struct RSSFeedListView: View {
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 24)
+        }
+        .padding()
+    }
+    
+    @ViewBuilder
+    private var noSearchResultsState: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "magnifyingglass")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 80, height: 80)
+                .foregroundColor(.gray)
+            
+            Text("No results found")
+                .font(.title2)
+                .fontWeight(.semibold)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+            
+            Text("Try a different search term to find what you’re looking for.")
+                .font(.body)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
         }
         .padding()
     }

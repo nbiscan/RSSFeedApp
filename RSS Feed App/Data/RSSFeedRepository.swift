@@ -128,7 +128,7 @@ extension RSSFeedRepository {
         print("schedule notification for \(item.id.absoluteString)")
 
         UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
+            if let error {
                 print("Error scheduling notification: \(error)")
             }
         }

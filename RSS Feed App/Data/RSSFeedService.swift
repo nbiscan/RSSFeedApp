@@ -7,13 +7,6 @@
 
 import Foundation
 
-enum NetworkError: Error {
-    case invalidURL
-    case invalidResponse
-    case invalidData
-    case parsingError(Error)
-}
-
 protocol RSSFeedServiceProtocol {
     func fetchFeed(from url: URL) async throws -> RSSFeed
 }
@@ -69,8 +62,8 @@ final class RSSFeedService: NSObject, RSSFeedServiceProtocol {
         parser.delegate = self
         
         guard parser.parse() else {
-            if let parserError = parser.parserError {
-                throw NetworkError.parsingError(parserError)
+            if parser.parserError != nil {
+                throw NetworkError.parsingError
             } else {
                 throw NetworkError.invalidData
             }

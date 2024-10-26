@@ -26,6 +26,10 @@ final class RSSFeedListViewModel: ObservableObject {
         }
     }
     
+    var shouldShowEmptyState: Bool {
+        filteredFeeds.isEmpty
+    }
+    
     var hasFeeds: Bool {
         withAnimation(.smooth) {
             !feeds.isEmpty
@@ -42,14 +46,19 @@ final class RSSFeedListViewModel: ObservableObject {
         guard feeds.isEmpty else { return }
         
         loading = true
+        defer {
+            loading = false
+        }
+        
         feeds = getRSSFeedsUseCase.execute()
-        loading = false
+       
     }
     
     func addFeed() async {
+        let trimmedNewUrl = newFeedURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        
         guard newFeedURL != "",
-              let url = URL(string: newFeedURL) else {
-            loading = false
+              let url = URL(string: trimmedNewUrl) else {
             newFeedURL = ""
             return
         }

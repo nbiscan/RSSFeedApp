@@ -15,14 +15,18 @@ struct RSSFeedListView: View {
             VStack {
                 header
                 
-                if viewModel.hasFeeds {
-                    list
+                if viewModel.shouldShowEmptyState {
+                    Spacer()
+                    
+                    if viewModel.isShowingFavorites {
+                        favoritesEmptyState
+                    } else {
+                        emptyState
+                    }
+                    
+                    Spacer()
                 } else {
-                    Spacer()
-                    
-                    emptyState
-                    
-                    Spacer()
+                    list
                 }
             }
             .isLoading(viewModel.loading)
@@ -128,11 +132,33 @@ struct RSSFeedListView: View {
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
+        }
+        .padding()
+    }
+    
+    @ViewBuilder
+    private var favoritesEmptyState: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "star.slash.fill")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 80, height: 80)
+                .foregroundColor(.gray)
             
+            Text("No Favorites Yet")
+                .font(.title)
+                .fontWeight(.bold)
+            
+            Text("Add some favorite feeds to access them quickly.")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 24)
         }
         .padding()
     }
 }
+
 
 #Preview {
     RSSFeedListView()

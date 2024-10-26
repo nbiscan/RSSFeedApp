@@ -11,6 +11,8 @@ protocol RSSFeedRepositoryProtocol {
     func addFeed(url: URL) async throws -> RSSFeed
     func removeFeed(url: URL)
     func getFeeds() async -> [RSSFeed]
+    func getFeedDetails(feedURL: URL) async -> RSSFeed?
+    func getRSSFeedListItems() -> [RSSListItem]
     func getFeedItems(feedURL: URL) async -> [RSSItem]
     func toggleFavoriteFeed(feedURL: URL) async
     func toggleNotifications(feedURL: URL, enable: Bool) async
@@ -26,9 +28,10 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
         self.rssFeedService = service
         self.dataSource = dataSource
     }
-
-    deinit {
-        print("RSSFeedRepository deinit")
+    
+    func getFeedDetails(feedURL: URL) async -> RSSFeed? {
+        let allFeeds = dataSource.loadFeeds()
+        return allFeeds.first { $0.url == feedURL }
     }
 
     func addFeed(url: URL) async throws -> RSSFeed {
@@ -56,6 +59,10 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
 
     func getFeeds() async -> [RSSFeed] {
         return dataSource.loadFeeds()
+    }
+    
+    func getRSSFeedListItems() -> [RSSListItem] {
+        return dataSource.loadFeeds().map { .init(from: $0) }
     }
 
     func getFeedItems(feedURL: URL) async -> [RSSItem] {

@@ -17,7 +17,7 @@ struct RSSFeedListView: View {
                 
                 List {
                     ForEach(viewModel.filteredFeeds, id: \.id) { feed in
-                        NavigationLink(destination: RSSFeedDetailsView(feed: feed)) {
+                        NavigationLink(destination: RSSFeedDetailsView(feedURL: feed.url)) {
                             RSSFeedCard(feed: feed)
                                 .swipeActions(edge: .leading, allowsFullSwipe: true) {
                                     Button {
@@ -61,7 +61,7 @@ struct RSSFeedListView: View {
         VStack(alignment: .leading, spacing: 20) {
             HStack {
                 TextField("Enter RSS Feed URL", text: $viewModel.newFeedURL)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .keyboardType(.URL)
                 
                 Button(action: {
                     Task {

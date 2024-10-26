@@ -7,7 +7,7 @@
 
 import SwiftUI
 struct RSSFeedCard: View {
-    let feed: RSSFeed
+    let feed: RSSListItem
     
     var body: some View {
         HStack(spacing: 16) {

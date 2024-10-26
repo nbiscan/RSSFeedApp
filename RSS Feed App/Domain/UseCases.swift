@@ -32,8 +32,29 @@ protocol ToggleNotificationsUseCaseProtocol {
     func execute(feedURL: URL, enable: Bool) async
 }
 
-// MARK: - Use Case Implementations
+protocol GetRSSFeedDetailsUseCaseProtocol {
+    func execute(feedURL: URL) async -> RSSFeed?
+}
 
+protocol GetRSSFeedListUseCaseProtocol {
+    func execute() -> [RSSListItem]
+}
+
+final class GetRSSFeedListUseCase: GetRSSFeedListUseCaseProtocol {
+    private let repository: RSSFeedRepositoryProtocol = RSSFeedRepository.shared
+
+    func execute() -> [RSSListItem] {
+        return repository.getRSSFeedListItems()
+    }
+}
+
+final class GetRSSFeedDetailsUseCase: GetRSSFeedDetailsUseCaseProtocol {
+    let repository = RSSFeedRepository.shared
+
+    func execute(feedURL: URL) async -> RSSFeed? {
+        return await repository.getFeedDetails(feedURL: feedURL)
+    }
+}
 final class AddRSSFeedUseCase: AddRSSFeedUseCaseProtocol {
     let repository = RSSFeedRepository.shared
     

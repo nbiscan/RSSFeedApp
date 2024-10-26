@@ -1,5 +1,5 @@
 //
-//  RSSFeedViewModel.swift
+//  RSSFeedListViewModel.swift
 //  RSS Feed App
 //
 //  Created by Natko Biscan on 14.10.2024..
@@ -9,24 +9,26 @@ import SwiftUI
 
 @Observable
 final class RSSFeedListViewModel: ObservableObject {
-    private var feeds: [RSSFeed] = []
+    private var feeds: [RSSListItem] = []
     var newFeedURL: String = ""
     var isShowingFavorites: Bool = false
     
     var loading: Bool = false
     var alertItem: AlertItem?
     
-    var filteredFeeds: [RSSFeed] {
+    var filteredFeeds: [RSSListItem] {
         isShowingFavorites ? feeds.filter(\.isFavorite) : feeds
     }
     
     private let addRSSFeedUseCase: AddRSSFeedUseCaseProtocol = AddRSSFeedUseCase()
     private let removeRSSFeedUseCase: RemoveRSSFeedUseCaseProtocol = RemoveRSSFeedUseCase()
-    private let getRSSFeedsUseCase: GetRSSFeedsUseCaseProtocol = GetRSSFeedsUseCase()
+    private let getRSSFeedsUseCase: GetRSSFeedListUseCaseProtocol = GetRSSFeedListUseCase()
     private let getRSSFeedItemsUseCase: GetRSSFeedItemsUseCaseProtocol = GetRSSFeedItemsUseCase()
     private let toggleFavoriteFeedUseCase: ToggleFavoriteFeedUseCaseProtocol = ToggleFavoriteFeedUseCase()
     
     func loadFeeds() async {
+        guard feeds.isEmpty else { return }
+        
         loading = true
         feeds = await getRSSFeedsUseCase.execute()
         loading = false
@@ -50,7 +52,7 @@ final class RSSFeedListViewModel: ObservableObject {
         
         do {
             let result = try await addRSSFeedUseCase.execute(url: url)
-            feeds.insert(result, at: 0)
+            feeds.insert(.init(from: result), at: 0)
         } catch {
             alertItem = AlertItem(message: error.localizedDescription)
         }

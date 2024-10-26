@@ -13,7 +13,7 @@ final class RSSFeedListViewModel: ObservableObject {
     var newFeedURL: String = ""
     var isShowingFavorites: Bool = false
     
-    var loading: Bool = false
+    var loading: Bool = true
     var alertItem: AlertItem?
     
     var filteredFeeds: [RSSListItem] {
@@ -27,7 +27,7 @@ final class RSSFeedListViewModel: ObservableObject {
     }
     
     var shouldShowEmptyState: Bool {
-        filteredFeeds.isEmpty
+        filteredFeeds.isEmpty && !loading
     }
     
     var hasFeeds: Bool {

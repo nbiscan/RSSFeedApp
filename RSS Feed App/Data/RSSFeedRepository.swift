@@ -6,7 +6,6 @@
 //
 
 import Foundation
-
 protocol RSSFeedRepositoryProtocol {
     func addFeed(url: URL) async throws -> RSSFeed
     func removeFeed(url: URL)
@@ -22,7 +21,7 @@ protocol RSSFeedRepositoryProtocol {
 final class RSSFeedRepository: RSSFeedRepositoryProtocol {
     private let rssFeedService: RSSFeedServiceProtocol
     private let dataSource: RSSFeedDataSourceProtocol
-    
+
     static let shared = RSSFeedRepository(service: RSSFeedService())
 
     private init(service: RSSFeedServiceProtocol, dataSource: RSSFeedDataSourceProtocol = RSSFeedDataSource()) {
@@ -31,8 +30,7 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
     }
     
     func getFeedDetails(feedURL: URL) async -> RSSFeed? {
-        let allFeeds = dataSource.loadFeeds()
-        return allFeeds.first { $0.url == feedURL }
+        return dataSource.loadFeeds().first { $0.url == feedURL }
     }
 
     func addFeed(url: URL) async throws -> RSSFeed {
@@ -67,10 +65,22 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
     }
 
     func getFeedItems(feedURL: URL) async -> [RSSItem] {
-        guard let feed = await getFeeds().first(where: { $0.url == feedURL }) else {
+        guard let feed = await getFeedDetails(feedURL: feedURL) else {
             return []
         }
-        return feed.items
+        
+        let currentItems = feed.items
+        let storedItems = dataSource.loadFeeds().first { $0.url == feedURL }?.items ?? []
+        
+        let newItems = currentItems.filter { currentItem in
+            !storedItems.contains(where: { $0.id == currentItem.id })
+        }
+        
+        for newItem in newItems {
+            scheduleNotification(for: feed, item: newItem)
+        }
+        
+        return currentItems
     }
 
     func toggleFavoriteFeed(feedURL: URL) async {
@@ -112,8 +122,10 @@ extension RSSFeedRepository {
         let request = UNNotificationRequest(
             identifier: item.id.absoluteString,
             content: content,
-            trigger: UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false) // TODO: change interval
+            trigger: UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
         )
+        
+        print("schedule notification for \(item.id.absoluteString)")
 
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error {

@@ -102,3 +102,46 @@ final class ToggleNotificationsUseCase: ToggleNotificationsUseCaseProtocol {
         await repository.toggleNotifications(feedURL: feedURL, enable: enable)
     }
 }
+
+
+// mocks
+
+final class MockAddRSSFeedUseCase: AddRSSFeedUseCaseProtocol {
+    var result: RSSFeed = .mock
+    func execute(url: URL) async throws -> RSSFeed {
+        return result
+    }
+}
+
+final class MockRemoveRSSFeedUseCase: RemoveRSSFeedUseCaseProtocol {
+    func execute(feedURL: URL) { }
+}
+
+final class MockGetRSSFeedListUseCase: GetRSSFeedListUseCaseProtocol {
+    var result: [RSSListItem] = []
+    func execute() -> [RSSListItem] {
+        return result
+    }
+}
+
+final class MockToggleFavoriteFeedUseCase: ToggleFavoriteFeedUseCaseProtocol {
+    func execute(feedURL: URL) async { }
+}
+
+final class MockGetRSSFeedDetailsUseCase: GetRSSFeedDetailsUseCaseProtocol {
+    var result: RSSFeed?
+    
+    func execute(feedURL: URL) async -> RSSFeed? {
+        return result
+    }
+}
+
+final class MockToggleNotificationsUseCase: ToggleNotificationsUseCaseProtocol {
+    var receivedFeedURL: URL?
+    var receivedIsEnabled: Bool?
+    
+    func execute(feedURL: URL, enable: Bool) async {
+        receivedFeedURL = feedURL
+        receivedIsEnabled = enable
+    }
+}

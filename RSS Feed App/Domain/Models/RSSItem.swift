@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct RSSItem: Identifiable, Codable {
+struct RSSItem: Identifiable, Codable, Equatable {
     let title: String
     let description: String
     let imageUrl: URL?

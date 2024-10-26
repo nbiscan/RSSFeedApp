@@ -9,7 +9,7 @@ import SwiftUI
 
 @Observable
 final class RSSFeedListViewModel: ObservableObject {
-    private var feeds: [RSSListItem] = []
+    var feeds: [RSSListItem] = []
     var newFeedURL: String = ""
     var isShowingFavorites: Bool = false
     var searchText: String = ""
@@ -47,11 +47,23 @@ final class RSSFeedListViewModel: ObservableObject {
         }
     }
     
-    private let addRSSFeedUseCase: AddRSSFeedUseCaseProtocol = AddRSSFeedUseCase()
-    private let removeRSSFeedUseCase: RemoveRSSFeedUseCaseProtocol = RemoveRSSFeedUseCase()
-    private let getRSSFeedsUseCase: GetRSSFeedListUseCaseProtocol = GetRSSFeedListUseCase()
-    private let getRSSFeedItemsUseCase: GetRSSFeedItemsUseCaseProtocol = GetRSSFeedItemsUseCase()
-    private let toggleFavoriteFeedUseCase: ToggleFavoriteFeedUseCaseProtocol = ToggleFavoriteFeedUseCase()
+    private let addRSSFeedUseCase: AddRSSFeedUseCaseProtocol
+    private let removeRSSFeedUseCase: RemoveRSSFeedUseCaseProtocol
+    private let getRSSFeedsUseCase: GetRSSFeedListUseCaseProtocol
+    private let getRSSFeedItemsUseCase: GetRSSFeedItemsUseCaseProtocol
+    private let toggleFavoriteFeedUseCase: ToggleFavoriteFeedUseCaseProtocol
+    
+    init(addRSSFeedUseCase: AddRSSFeedUseCaseProtocol = AddRSSFeedUseCase(),
+         removeRSSFeedUseCase: RemoveRSSFeedUseCaseProtocol = RemoveRSSFeedUseCase(),
+         getRSSFeedsUseCase: GetRSSFeedListUseCaseProtocol = GetRSSFeedListUseCase(),
+         getRSSFeedItemsUseCase: GetRSSFeedItemsUseCaseProtocol = GetRSSFeedItemsUseCase(),
+         toggleFavoriteFeedUseCase: ToggleFavoriteFeedUseCaseProtocol = ToggleFavoriteFeedUseCase()) {
+        self.addRSSFeedUseCase = addRSSFeedUseCase
+        self.removeRSSFeedUseCase = removeRSSFeedUseCase
+        self.getRSSFeedsUseCase = getRSSFeedsUseCase
+        self.getRSSFeedItemsUseCase = getRSSFeedItemsUseCase
+        self.toggleFavoriteFeedUseCase = toggleFavoriteFeedUseCase
+    }
     
     func loadFeeds() async {
         guard feeds.isEmpty else { return }

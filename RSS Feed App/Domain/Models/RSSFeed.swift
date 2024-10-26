@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct RSSFeed: Identifiable, Codable {
+struct RSSFeed: Identifiable, Codable, Equatable {
     let title: String
     let description: String
     let imageUrl: URL?

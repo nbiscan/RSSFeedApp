@@ -18,17 +18,26 @@ final class RSSFeedDetailsViewModel: ObservableObject {
     }
     var loading: Bool = false
     
-    private let getRSSFeedDetailsUseCase: GetRSSFeedDetailsUseCaseProtocol = GetRSSFeedDetailsUseCase()
-    private let toggleNotificationsUseCase: ToggleNotificationsUseCaseProtocol = ToggleNotificationsUseCase()
+    private let getRSSFeedDetailsUseCase: GetRSSFeedDetailsUseCaseProtocol
+    private let toggleNotificationsUseCase: ToggleNotificationsUseCaseProtocol
     
-    init(feedURL: URL) {
+    init(feedURL: URL,
+         getRSSFeedDetailsUseCase: GetRSSFeedDetailsUseCaseProtocol = GetRSSFeedDetailsUseCase(),
+         toggleNotificationsUseCase: ToggleNotificationsUseCaseProtocol = ToggleNotificationsUseCase()
+    ) {
         self.feedURL = feedURL
+        self.getRSSFeedDetailsUseCase = getRSSFeedDetailsUseCase
+        self.toggleNotificationsUseCase = toggleNotificationsUseCase
     }
     
     func loadFeedDetails() async {
         loading = true
         feed = await getRSSFeedDetailsUseCase.execute(feedURL: feedURL)
         notificationsEnabled = feed?.notificationsEnabled ?? false
+        
+        if let feed, feed.notificationsEnabled {
+            let _ = await RSSFeedRepository.shared.getFeedItems(feedURL: feedURL)
+        }
         
         loading = false
     }

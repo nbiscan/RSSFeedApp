@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct RSSListItem: Identifiable {
+struct RSSListItem: Identifiable, Equatable {
     let url: URL
     let title: String
     let description: String
@@ -15,6 +15,14 @@ struct RSSListItem: Identifiable {
     var isFavorite: Bool
     
     var id: URL { url }
+    
+    init(url: URL, title: String, description: String, imageUrl: URL?, isFavorite: Bool) {
+        self.url = url
+        self.title = title
+        self.description = description
+        self.imageUrl = imageUrl
+        self.isFavorite = isFavorite
+    }
 
     init(from feed: RSSFeed) {
         self.url = feed.url

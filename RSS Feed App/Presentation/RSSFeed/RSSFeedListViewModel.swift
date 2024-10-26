@@ -20,6 +20,18 @@ final class RSSFeedListViewModel: ObservableObject {
         isShowingFavorites ? feeds.filter(\.isFavorite) : feeds
     }
     
+    var isAddingDisabled: Bool {
+        withAnimation(.smooth) {
+            newFeedURL.isEmpty
+        }
+    }
+    
+    var hasFeeds: Bool {
+        withAnimation(.smooth) {
+            !feeds.isEmpty
+        }
+    }
+    
     private let addRSSFeedUseCase: AddRSSFeedUseCaseProtocol = AddRSSFeedUseCase()
     private let removeRSSFeedUseCase: RemoveRSSFeedUseCaseProtocol = RemoveRSSFeedUseCase()
     private let getRSSFeedsUseCase: GetRSSFeedListUseCaseProtocol = GetRSSFeedListUseCase()
@@ -30,7 +42,7 @@ final class RSSFeedListViewModel: ObservableObject {
         guard feeds.isEmpty else { return }
         
         loading = true
-        feeds = await getRSSFeedsUseCase.execute()
+        feeds = getRSSFeedsUseCase.execute()
         loading = false
     }
     

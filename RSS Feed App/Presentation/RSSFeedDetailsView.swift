@@ -4,50 +4,89 @@
 //
 //  Created by Natko Biscan on 15.10.2024..
 //
-
 import SwiftUI
+
 struct RSSFeedDetailsView: View {
-    let feed: RSSFeed
+    @StateObject private var viewModel: RSSFeedDetailsViewModel
+    @State private var showMore: Bool = false
+    @State private var isExpandable: Bool = false
+    
+    init(feed: RSSFeed) {
+        _viewModel = StateObject(wrappedValue: RSSFeedDetailsViewModel(feed: feed))
+    }
     
     var body: some View {
-        VStack(spacing: 16) {
-            VStack(alignment: .center, spacing: 8) {
-                Text(feed.title)
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
+        List {
+            Section {
+                VStack(spacing: 16) {
+                    HStack {
+                        if let url = viewModel.feed.imageUrl {
+                            AsyncImage(url: url) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 60, height: 60)
+                                    .cornerRadius(12)
+                            } placeholder: {
+                                ProgressView()
+                                    .frame(width: 60, height: 60)
+                            }
+                        }
+                        
+                        Text(viewModel.feed.title)
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
+                    
+                    ZStack {
+                        Text(viewModel.feed.description)
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(showMore ? nil : 4)
+                            .background(
+                                GeometryReader { geo in
+                                    Color.clear.onAppear {
+                                        let fourLineHeight: CGFloat = 72
+                                        if geo.size.height > fourLineHeight {
+                                            isExpandable = true
+                                        }
+                                    }
+                                }
+                            )
+                            .padding(.horizontal)
+                    }
+                    
+                    if isExpandable {
+                        Button(action: {
+                            withAnimation {
+                                showMore.toggle()
+                            }
+                        }) {
+                            Text(showMore ? "Show Less" : "Show More")
+                                .font(.subheadline)
+                                .foregroundColor(.blue)
+                        }
+                    }
+                }
+                .padding(.vertical, 8)
                 
-                Text(feed.description)
-                    .font(.body)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
+                Toggle("Enable Notifications", isOn: $viewModel.notificationsEnabled)
                     .padding(.horizontal)
             }
             
-            if let url = feed.imageUrl {
-                AsyncImage(url: url) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 120, height: 120)
-                        .cornerRadius(12)
-                        .shadow(radius: 5)
-                } placeholder: {
-                    ProgressView()
-                        .frame(width: 120, height: 120)
+            Section {
+                ForEach(viewModel.feed.items, id: \.id) { item in
+                    itemCell(for: item)
                 }
             }
-            
-            List(feed.items, id: \.id) { item in
-                itemCell(for: item)
-            }
         }
-        .padding()
+        .listStyle(InsetGroupedListStyle())
         .navigationBarTitleDisplayMode(.inline)
     }
     
-    // Make item a parameter for this function
     @ViewBuilder
     private func itemCell(for item: RSSItem) -> some View {
         NavigationLink(destination: WebView(url: item.link)) {

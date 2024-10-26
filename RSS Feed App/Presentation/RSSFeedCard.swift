@@ -11,29 +11,21 @@ struct RSSFeedCard: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            // Image block
             if let imageUrl = feed.imageUrl {
                 AsyncImage(url: imageUrl) { image in
                     image
                         .resizable()
-                        .aspectRatio(contentMode: .fill)
+                        .aspectRatio(contentMode: .fit)
                         .frame(width: 70, height: 70)
+                        .shadow(radius: 1)
                         .cornerRadius(8)
                         .clipped()
                 } placeholder: {
                     ProgressView()
                         .frame(width: 70, height: 70)
                 }
-            } else {
-                Image(systemName: "photo")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 70, height: 70)
-                    .foregroundColor(.gray)
-                    .background(Color(.systemGray5))
-                    .cornerRadius(8)
             }
-
+            
             VStack(alignment: .leading, spacing: 6) {
                 Text(feed.title)
                     .font(.headline)
@@ -47,7 +39,6 @@ struct RSSFeedCard: View {
             }
         }
         .padding()
-        .background(Color(.secondarySystemBackground))
         .cornerRadius(12)
     }
 }

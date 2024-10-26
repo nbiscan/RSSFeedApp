@@ -8,82 +8,34 @@
 import Foundation
 
 protocol RSSFeedDataSourceProtocol {
-    func saveFeedURLs(_ urls: [URL])
-    func loadFeedURLs() -> [URL]
-    func removeFeedURL(_ url: URL)
-    
-    func saveFavoriteURLs(_ urls: [URL])
-    func loadFavoriteURLs() -> [URL]
-    func addFavoriteURL(_ url: URL)
-    func removeFavoriteURL(_ url: URL)
-    func isFavoriteURL(_ url: URL) -> Bool
-    
-    func saveNotificationSettings(for url: URL, isEnabled: Bool)
-    func loadNotificationSettings(for url: URL) -> Bool
+    func saveFeeds(_ feeds: [RSSFeed])
+    func loadFeeds() -> [RSSFeed]
+    func updateFeed(_ feed: RSSFeed)
 }
 
 final class RSSFeedDataSource: RSSFeedDataSourceProtocol {
-    private let userDefaultsKey = "savedFeedURLs"
-    private let favoritesKey = "favoriteFeedURLs"
-    private let notificationsKey = "notificationFeedURLs"
+    private let feedsKey = "savedFeeds"
     private let userDefaults = UserDefaults.standard
     
-    func saveFeedURLs(_ urls: [URL]) {
-        let urlStrings = urls.map { $0.absoluteString }
-        userDefaults.set(urlStrings, forKey: userDefaultsKey)
+    func saveFeeds(_ feeds: [RSSFeed]) {
+        if let data = try? JSONEncoder().encode(feeds) {
+            userDefaults.set(data, forKey: feedsKey)
+        }
     }
     
-    func loadFeedURLs() -> [URL] {
-        guard let urlStrings = userDefaults.stringArray(forKey: userDefaultsKey) else {
+    func loadFeeds() -> [RSSFeed] {
+        guard let data = userDefaults.data(forKey: feedsKey),
+              let feeds = try? JSONDecoder().decode([RSSFeed].self, from: data) else {
             return []
         }
-        return urlStrings.compactMap { URL(string: $0) }
+        return feeds
     }
     
-    func removeFeedURL(_ url: URL) {
-        var currentURLs = loadFeedURLs()
-        currentURLs.removeAll(where: { $0.absoluteString == url.absoluteString })
-        saveFeedURLs(currentURLs)
-    }
-    
-    func saveFavoriteURLs(_ urls: [URL]) {
-        let urlStrings = urls.map { $0.absoluteString }
-        userDefaults.set(urlStrings, forKey: favoritesKey)
-    }
-    
-    func loadFavoriteURLs() -> [URL] {
-        guard let urlStrings = userDefaults.stringArray(forKey: favoritesKey) else {
-            return []
+    func updateFeed(_ feed: RSSFeed) {
+        var feeds = loadFeeds()
+        if let index = feeds.firstIndex(where: { $0.url == feed.url }) {
+            feeds[index] = feed
+            saveFeeds(feeds)
         }
-        return urlStrings.compactMap { URL(string: $0) }
-    }
-    
-    func addFavoriteURL(_ url: URL) {
-        var favorites = loadFavoriteURLs()
-        if !favorites.contains(url) {
-            favorites.append(url)
-            saveFavoriteURLs(favorites)
-        }
-    }
-    
-    func removeFavoriteURL(_ url: URL) {
-        var favorites = loadFavoriteURLs()
-        favorites.removeAll(where: { $0.absoluteString == url.absoluteString })
-        saveFavoriteURLs(favorites)
-    }
-    
-    func isFavoriteURL(_ url: URL) -> Bool {
-        return loadFavoriteURLs().contains(url)
-    }
-    
-    func saveNotificationSettings(for url: URL, isEnabled: Bool) {
-        var notificationsSettings = UserDefaults.standard.dictionary(forKey: notificationsKey) as? [String: Bool] ?? [:]
-        notificationsSettings[url.absoluteString] = isEnabled
-        UserDefaults.standard.set(notificationsSettings, forKey: notificationsKey)
-    }
-    
-    func loadNotificationSettings(for url: URL) -> Bool {
-        let notificationsSettings = UserDefaults.standard.dictionary(forKey: notificationsKey) as? [String: Bool] ?? [:]
-        return notificationsSettings[url.absoluteString] ?? false
     }
 }

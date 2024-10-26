@@ -37,7 +37,9 @@ struct RSSFeedListView: View {
                         }
                     }
                 }
+                .scrollDismissesKeyboard(.interactively)
             }
+            .isLoading(viewModel.loading)
             .alert(item: $viewModel.alertItem) { alertItem in
                 Alert(
                     title: Text("Error"),

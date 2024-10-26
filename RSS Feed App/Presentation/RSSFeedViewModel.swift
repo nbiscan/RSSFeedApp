@@ -27,8 +27,6 @@ final class RSSFeedListViewModel: ObservableObject {
     private let toggleFavoriteFeedUseCase: ToggleFavoriteFeedUseCaseProtocol = ToggleFavoriteFeedUseCase()
     
     func loadFeeds() async {
-        print(UserDefaults.standard.dictionaryRepresentation())
-        
         loading = true
         feeds = await getRSSFeedsUseCase.execute()
         loading = false
@@ -52,7 +50,7 @@ final class RSSFeedListViewModel: ObservableObject {
         
         do {
             let result = try await addRSSFeedUseCase.execute(url: url)
-            feeds.append(result)
+            feeds.insert(result, at: 0)
         } catch {
             alertItem = AlertItem(message: error.localizedDescription)
         }

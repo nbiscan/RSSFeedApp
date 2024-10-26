@@ -8,26 +8,21 @@
 import SwiftUI
 
 struct ContentView: View {
-    var body: some View {
-        TabView {
-            RSSFeedListView()
-                .tabItem {
-                    Label("Feeds", systemImage: "list.bullet")
-                }
-            
-            SettingsView()
-                .tabItem {
-                    Label("Settings", systemImage: "gearshape.fill")
-                }
-        }
+    init() {
+        requestNotificationPermission()
     }
-}
-
-struct FavoritesView: View {
+    
     var body: some View {
-        NavigationView {
-            Text("Favorites")
-                .navigationTitle("Favorites")
+        RSSFeedListView()
+    }
+    
+    private func requestNotificationPermission() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
+            if granted {
+                print("Notification permission granted.")
+            } else {
+                print("Notification permission denied.")
+            }
         }
     }
 }

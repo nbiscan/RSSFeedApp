@@ -75,6 +75,11 @@ struct RSSFeedDetailsView: View {
                     }
                     .padding(.vertical, 8)
                     
+                    if feed.isFavorite {
+                        Image(systemName: "star")
+                            .foregroundStyle(.orange)
+                    }
+                    
                     Toggle("Enable Notifications", isOn: $viewModel.notificationsEnabled)
                         .padding(.horizontal)
                 }

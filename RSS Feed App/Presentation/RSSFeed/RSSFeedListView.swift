@@ -38,7 +38,7 @@ struct RSSFeedListView: View {
             .task {
                 await viewModel.loadFeeds()
             }
-            .navigationTitle("RSS Feeds")
+            .navigationTitle("Your RSS Feeds")
         }
     }
     

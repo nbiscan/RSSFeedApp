@@ -36,6 +36,14 @@ struct RSSFeedCard: View {
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .lineLimit(3)
+                
+                if feed.isFavorite {
+                    Image(systemName: "star")
+                        .resizable()
+                        .scaledToFit()
+                        .foregroundStyle(.orange)
+                        .frame(width: 15, height: 15)
+                }
             }
         }
         .padding()

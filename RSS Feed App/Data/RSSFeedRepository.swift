@@ -16,6 +16,7 @@ protocol RSSFeedRepositoryProtocol {
     func getFeedItems(feedURL: URL) async -> [RSSItem]
     func toggleFavoriteFeed(feedURL: URL) async
     func toggleNotifications(feedURL: URL, enable: Bool) async
+    func scheduleNotification(for feed: RSSFeed, item: RSSItem)
 }
 
 final class RSSFeedRepository: RSSFeedRepositoryProtocol {
@@ -94,5 +95,30 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
         var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
         components?.scheme = "https"
         return components?.url ?? url
+    }
+}
+
+import UserNotifications
+
+extension RSSFeedRepository {
+    func scheduleNotification(for feed: RSSFeed, item: RSSItem) {
+        guard feed.notificationsEnabled else { return }
+
+        let content = UNMutableNotificationContent()
+        content.title = feed.title
+        content.body = item.title
+        content.sound = .default
+
+        let request = UNNotificationRequest(
+            identifier: item.id.absoluteString,
+            content: content,
+            trigger: UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false) // TODO: change interval
+        )
+
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Error scheduling notification: \(error)")
+            }
+        }
     }
 }

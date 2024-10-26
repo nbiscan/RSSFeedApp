@@ -20,12 +20,10 @@ struct RSSFeedListView: View {
                     
                     if viewModel.isShowingFavorites {
                         favoritesEmptyState
+                    } else if !viewModel.hasFeeds {
+                        emptyState
                     } else {
-                        if !viewModel.hasFeeds {
-                            emptyState
-                        } else {
-                            noSearchResultsState
-                        }
+                        noSearchResultsState
                     }
                     
                     Spacer()
@@ -87,8 +85,7 @@ struct RSSFeedListView: View {
                     .foregroundColor(.white)
                     .cornerRadius(8)
                     
-                    TextField("Search Feeds", text: $viewModel.searchText)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    TextField("Search Feed Titles", text: $viewModel.searchText)
                         .padding(.horizontal)
                 }
             }

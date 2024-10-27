@@ -6,16 +6,17 @@
 //
 
 import Foundation
+import UserNotifications
+
 protocol RSSFeedRepositoryProtocol {
     func addFeed(url: URL) async throws -> RSSFeed
     func removeFeed(url: URL)
     func getFeeds() async -> [RSSFeed]
     func getFeedDetails(feedURL: URL) async -> RSSFeed?
     func getRSSFeedListItems() -> [RSSListItem]
-    func getFeedItems(feedURL: URL) async -> [RSSItem]
+    func getFeedItems(feedURL: URL) async throws -> [RSSItem]
     func toggleFavoriteFeed(feedURL: URL) async
     func toggleNotifications(feedURL: URL, enable: Bool) async
-    func scheduleNotification(for feed: RSSFeed, item: RSSItem)
 }
 
 final class RSSFeedRepository: RSSFeedRepositoryProtocol {
@@ -30,17 +31,32 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
     }
     
     func getFeedDetails(feedURL: URL) async -> RSSFeed? {
-        return dataSource.loadFeeds().first { $0.url == feedURL }
+        do {
+            let latestFeed = try await rssFeedService.fetchFeed(from: feedURL)
+            var storedFeeds = dataSource.loadFeeds()
+            
+            if let index = storedFeeds.firstIndex(where: { $0.url == feedURL }) {
+                storedFeeds[index] = latestFeed
+            } else {
+                storedFeeds.append(latestFeed)
+            }
+            
+            dataSource.saveFeeds(storedFeeds)
+            
+            return latestFeed
+        } catch {
+            print("Error fetching feed from network: \(error)")
+            return dataSource.loadFeeds().first { $0.url == feedURL }
+        }
     }
+
 
     func addFeed(url: URL) async throws -> RSSFeed {
         let normalizedURL = normalizeURL(url)
         var currentFeeds = dataSource.loadFeeds()
 
         if currentFeeds.contains(where: { $0.url == normalizedURL }) {
-            throw NSError(domain: "RSSFeedRepositoryError",
-                          code: 1,
-                          userInfo: [NSLocalizedDescriptionKey: "This URL has already been added."])
+            throw NetworkError.invalidURL
         }
 
         let newFeed = try await rssFeedService.fetchFeed(from: normalizedURL)
@@ -63,25 +79,36 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
     func getRSSFeedListItems() -> [RSSListItem] {
         return dataSource.loadFeeds().map { .init(from: $0) }
     }
-
-    func getFeedItems(feedURL: URL) async -> [RSSItem] {
-        guard let feed = await getFeedDetails(feedURL: feedURL) else {
-            return []
+    
+    func getFeedItems(feedURL: URL) async throws -> [RSSItem] {
+        // Fetch the latest items from the network
+        let latestFeed = try await rssFeedService.fetchFeed(from: feedURL)
+        
+        // Load stored feed
+        var storedFeeds = dataSource.loadFeeds()
+        if let index = storedFeeds.firstIndex(where: { $0.url == feedURL }) {
+            let storedFeed = storedFeeds[index]
+            
+            // Compare and add any new items to the stored feed
+            let newItems = latestFeed.items.filter { newItem in
+                !storedFeed.items.contains(where: { $0.id == newItem.id })
+            }
+            
+            if !newItems.isEmpty {
+                storedFeeds[index].items.append(contentsOf: newItems) // Update storage with new items
+                dataSource.saveFeeds(storedFeeds)
+            }
+            
+            // Return the updated list of items (including newly fetched ones)
+            return storedFeeds[index].items
+        } else {
+            // If the feed isn’t in storage yet, add it
+            storedFeeds.append(latestFeed)
+            dataSource.saveFeeds(storedFeeds)
+            return latestFeed.items
         }
-        
-        let currentItems = feed.items
-        let storedItems = dataSource.loadFeeds().first { $0.url == feedURL }?.items ?? []
-        
-        let newItems = currentItems.filter { currentItem in
-            !storedItems.contains(where: { $0.id == currentItem.id })
-        }
-        
-        for newItem in newItems {
-            scheduleNotification(for: feed, item: newItem)
-        }
-        
-        return currentItems
     }
+
 
     func toggleFavoriteFeed(feedURL: URL) async {
         var feeds = dataSource.loadFeeds()
@@ -105,32 +132,5 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
         var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
         components?.scheme = "https"
         return components?.url ?? url
-    }
-}
-
-import UserNotifications
-
-extension RSSFeedRepository {
-    func scheduleNotification(for feed: RSSFeed, item: RSSItem) {
-        guard feed.notificationsEnabled else { return }
-
-        let content = UNMutableNotificationContent()
-        content.title = feed.title
-        content.body = item.title
-        content.sound = .default
-
-        let request = UNNotificationRequest(
-            identifier: item.id.absoluteString,
-            content: content,
-            trigger: UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
-        )
-        
-        print("schedule notification for \(item.id.absoluteString)")
-
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error {
-                print("Error scheduling notification: \(error)")
-            }
-        }
     }
 }

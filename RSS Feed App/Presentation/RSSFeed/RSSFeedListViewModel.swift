@@ -14,11 +14,7 @@ final class RSSFeedListViewModel: ObservableObject {
     var isShowingFavorites: Bool = false
     var searchText: String = ""
     
-    var loading: Bool = true {
-        didSet {
-            print(loading.description) // for testing
-        }
-    }
+    var loading: Bool = true
     var alertItem: AlertItem?
     
     var filteredFeeds: [RSSListItem] {
@@ -121,9 +117,4 @@ final class RSSFeedListViewModel: ObservableObject {
             feeds[index].isFavorite.toggle()
         }
     }
-}
-
-struct AlertItem: Identifiable {
-    let id = UUID()
-    let message: String
 }

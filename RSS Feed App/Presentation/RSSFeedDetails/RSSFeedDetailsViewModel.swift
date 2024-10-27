@@ -17,6 +17,7 @@ final class RSSFeedDetailsViewModel: ObservableObject {
         }
     }
     var loading: Bool = false
+    var alertItem: AlertItem?
     
     private let getRSSFeedDetailsUseCase: GetRSSFeedDetailsUseCaseProtocol
     private let toggleNotificationsUseCase: ToggleNotificationsUseCaseProtocol
@@ -34,11 +35,6 @@ final class RSSFeedDetailsViewModel: ObservableObject {
         loading = true
         feed = await getRSSFeedDetailsUseCase.execute(feedURL: feedURL)
         notificationsEnabled = feed?.notificationsEnabled ?? false
-        
-        if let feed, feed.notificationsEnabled {
-            let _ = await RSSFeedRepository.shared.getFeedItems(feedURL: feedURL)
-        }
-        
         loading = false
     }
     

@@ -10,6 +10,7 @@ import Foundation
 protocol RSSFeedServiceProtocol {
     func fetchFeed(from url: URL) async throws -> RSSFeed
 }
+
 final class RSSFeedService: NSObject, RSSFeedServiceProtocol {
     private var currentElement: String = ""
     private var currentTitle: String = ""

@@ -21,7 +21,7 @@ protocol GetRSSFeedsUseCaseProtocol {
 }
 
 protocol GetRSSFeedItemsUseCaseProtocol {
-    func execute(feedURL: URL) async -> [RSSItem]
+    func execute(feedURL: URL) async throws -> [RSSItem]
 }
 
 protocol ToggleFavoriteFeedUseCaseProtocol {
@@ -82,8 +82,8 @@ final class GetRSSFeedsUseCase: GetRSSFeedsUseCaseProtocol {
 final class GetRSSFeedItemsUseCase: GetRSSFeedItemsUseCaseProtocol {
     let repository = RSSFeedRepository.shared
 
-    func execute(feedURL: URL) async -> [RSSItem] {
-        return await repository.getFeedItems(feedURL: feedURL)
+    func execute(feedURL: URL) async throws -> [RSSItem] {
+        return try await repository.getFeedItems(feedURL: feedURL)
     }
 }
 

@@ -21,19 +21,19 @@ protocol RSSFeedRepositoryProtocol {
 
 final class RSSFeedRepository: RSSFeedRepositoryProtocol {
     private let rssFeedService: RSSFeedServiceProtocol
-    private let dataSource: RSSFeedDataSourceProtocol
+    private let dataSource: LocalStorageDataSource<RSSFeed>
     
     static let shared = RSSFeedRepository()
     
     private init(service: RSSFeedServiceProtocol = RSSFeedService(),
-                 dataSource: RSSFeedDataSourceProtocol = RSSFeedDataSource()) {
+                 dataSource: LocalStorageDataSource<RSSFeed> = LocalStorageDataSource(storageKey: "savedFeeds")) {
         self.rssFeedService = service
         self.dataSource = dataSource
     }
     
     func addFeed(url: URL) async throws -> RSSFeed {
         let normalizedURL = url.normalized
-        var currentFeeds = dataSource.loadFeeds()
+        var currentFeeds = dataSource.loadEntities()
         
         if currentFeeds.contains(where: { $0.url == normalizedURL }) {
             throw NetworkError.invalidURL
@@ -41,7 +41,7 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
         
         let newFeed = try await rssFeedService.fetchFeed(from: normalizedURL)
         currentFeeds.append(newFeed)
-        dataSource.saveFeeds(currentFeeds)
+        dataSource.saveEntities(currentFeeds)
         
         return newFeed
     }
@@ -53,7 +53,7 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
     }
     
     func getFeeds() async -> [RSSFeed] {
-        return dataSource.loadFeeds()
+        return dataSource.loadEntities()
     }
     
     func getFeedDetails(feedURL: URL) async throws -> RSSFeed {
@@ -71,7 +71,7 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
     }
 
     func getRSSFeedListItems() -> [RSSListItem] {
-        return dataSource.loadFeeds().map { .init(from: $0) }
+        return dataSource.loadEntities().map { .init(from: $0) }
     }
     
     func getFeedItems(feedURL: URL) async throws -> [RSSItem] {
@@ -117,9 +117,10 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
 extension RSSFeedRepository {
     @discardableResult
     private func updateFeeds<T>(with modification: (inout [RSSFeed]) -> T) -> T {
-        var feeds = dataSource.loadFeeds()
+        var feeds = dataSource.loadEntities()
         let result = modification(&feeds)
-        dataSource.saveFeeds(feeds)
+        dataSource.saveEntities(feeds)
         return result
     }
 }
+

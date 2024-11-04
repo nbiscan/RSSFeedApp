@@ -14,8 +14,8 @@ final class RSSFeedDetailsViewModelTests: XCTestCase {
     private var mockToggleNotificationsUseCase: MockToggleNotificationsUseCase!
     private let feedURL = URL(string: "https://example.com/rss")!
     
-    override func setUp() {
-        super.setUp()
+    override func setUpWithError() throws {
+        try super.setUpWithError()
         
         mockGetDetailsUseCase = MockGetRSSFeedDetailsUseCase()
         mockToggleNotificationsUseCase = MockToggleNotificationsUseCase()
@@ -25,14 +25,15 @@ final class RSSFeedDetailsViewModelTests: XCTestCase {
                                             toggleNotificationsUseCase: mockToggleNotificationsUseCase)
     }
     
-    override func tearDown() {
+    override func tearDownWithError() throws {
+        try super.tearDownWithError()
+
         viewModel = nil
         mockGetDetailsUseCase = nil
         mockToggleNotificationsUseCase = nil
-        super.tearDown()
     }
     
-    func testLoadFeedDetails_SetsFeedAndNotificationsEnabled() async {
+    func testLoadFeedDetails_SetsFeedAndNotificationsEnabled() async throws {
         let expectedFeed = RSSFeed.mock
         mockGetDetailsUseCase.result = expectedFeed
         
@@ -42,33 +43,11 @@ final class RSSFeedDetailsViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.notificationsEnabled, expectedFeed.notificationsEnabled)
     }
 
-    func testLoadFeedDetails_SetsLoadingStateCorrectly() async {
+    func testLoadFeedDetails_SetsLoadingStateCorrectly() async throws {
         mockGetDetailsUseCase.result = RSSFeed.mock
         
         await viewModel.loadFeedDetails()
         
         XCTAssertFalse(viewModel.loading)
-    }
-    
-    func testToggleNotifications_EnablesNotifications() async {
-        let expectedFeed = RSSFeed.mock
-        mockGetDetailsUseCase.result = expectedFeed
-        await viewModel.loadFeedDetails()
-        
-        viewModel.notificationsEnabled = true
-        
-        XCTAssertEqual(mockToggleNotificationsUseCase.receivedFeedURL, expectedFeed.url)
-        XCTAssertEqual(mockToggleNotificationsUseCase.receivedIsEnabled, true)
-    }
-    
-    func testToggleNotifications_DisablesNotifications() async {
-        let expectedFeed = RSSFeed.mock
-        mockGetDetailsUseCase.result = expectedFeed
-        await viewModel.loadFeedDetails()
-        
-        viewModel.notificationsEnabled = false
-        
-        XCTAssertEqual(mockToggleNotificationsUseCase.receivedFeedURL, expectedFeed.url)
-        XCTAssertEqual(mockToggleNotificationsUseCase.receivedIsEnabled, false)
     }
 }

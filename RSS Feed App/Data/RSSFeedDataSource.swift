@@ -7,35 +7,45 @@
 
 import Foundation
 
-protocol RSSFeedDataSourceProtocol {
-    func saveFeeds(_ feeds: [RSSFeed])
-    func loadFeeds() -> [RSSFeed]
-    func updateFeed(_ feed: RSSFeed)
+protocol Storable: Codable {
+    var identifier: String { get }
 }
 
-final class RSSFeedDataSource: RSSFeedDataSourceProtocol {
-    private let feedsKey = "savedFeeds"
+protocol LocalStorageDataSourceProtocol {
+    associatedtype Entity: Storable
+    func saveEntities(_ entities: [Entity])
+    func loadEntities() -> [Entity]
+    func updateEntity(_ entity: Entity)
+}
+
+final class LocalStorageDataSource<T: Storable>: LocalStorageDataSourceProtocol {
+    typealias Entity = T
+    private let storageKey: String
     private let userDefaults = UserDefaults.standard
     
-    func saveFeeds(_ feeds: [RSSFeed]) {
-        if let data = try? JSONEncoder().encode(feeds) {
-            userDefaults.set(data, forKey: feedsKey)
+    init(storageKey: String) {
+        self.storageKey = storageKey
+    }
+    
+    func saveEntities(_ entities: [T]) {
+        if let data = try? JSONEncoder().encode(entities) {
+            userDefaults.set(data, forKey: storageKey)
         }
     }
     
-    func loadFeeds() -> [RSSFeed] {
-        guard let data = userDefaults.data(forKey: feedsKey),
-              let feeds = try? JSONDecoder().decode([RSSFeed].self, from: data) else {
+    func loadEntities() -> [T] {
+        guard let data = userDefaults.data(forKey: storageKey),
+              let entities = try? JSONDecoder().decode([T].self, from: data) else {
             return []
         }
-        return feeds
+        return entities
     }
     
-    func updateFeed(_ feed: RSSFeed) {
-        var feeds = loadFeeds()
-        if let index = feeds.firstIndex(where: { $0.url == feed.url }) {
-            feeds[index] = feed
-            saveFeeds(feeds)
+    func updateEntity(_ entity: T) {
+        var entities = loadEntities()
+        if let index = entities.firstIndex(where: { $0.identifier == entity.identifier }) {
+            entities[index] = entity
+            saveEntities(entities)
         }
     }
 }

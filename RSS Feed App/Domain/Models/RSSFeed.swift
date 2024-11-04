@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct RSSFeed: Identifiable, Codable, Equatable {
+struct RSSFeed: Identifiable, Codable, Equatable, Storable {    
     let title: String
     let description: String
     let imageUrl: URL?
@@ -17,6 +17,7 @@ struct RSSFeed: Identifiable, Codable, Equatable {
     var items: [RSSItem]
     
     var id: URL { url }
+    var identifier: String { url.absoluteString }
 }
 
 extension RSSFeed {
@@ -25,7 +26,7 @@ extension RSSFeed {
             title: "Mock Title",
             description: "Mock Description",
             imageUrl: nil,
-            url: .init(string: "https://example.com")!,
+            url: .init(string: "https://example.com/feed.xml")!,
             isFavorite: false,
             notificationsEnabled: false,
             items: [.mock])

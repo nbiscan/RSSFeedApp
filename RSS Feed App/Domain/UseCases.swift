@@ -139,8 +139,11 @@ final class MockToggleNotificationsUseCase: ToggleNotificationsUseCaseProtocol {
     var receivedFeedURL: URL?
     var receivedIsEnabled: Bool?
     
+    var onExecute: (() -> Void)?
+
     func execute(feedURL: URL, enable: Bool) async {
         receivedFeedURL = feedURL
         receivedIsEnabled = enable
+        onExecute?()
     }
 }

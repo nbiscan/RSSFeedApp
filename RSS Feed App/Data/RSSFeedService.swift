@@ -137,3 +137,17 @@ extension RSSFeedService: XMLParserDelegate {
         }
     }
 }
+
+// Mocks
+
+class MockRSSFeedService: RSSFeedServiceProtocol {
+    var feedToReturn: RSSFeed?
+    var errorToThrow: Error?
+    
+    func fetchFeed(from url: URL) async throws -> RSSFeed {
+        if let error = errorToThrow {
+            throw error
+        }
+        return feedToReturn ?? RSSFeed.mock
+    }
+}

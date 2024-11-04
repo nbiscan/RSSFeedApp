@@ -18,7 +18,7 @@ protocol LocalStorageDataSourceProtocol {
     func updateEntity(_ entity: Entity)
 }
 
-final class LocalStorageDataSource<T: Storable>: LocalStorageDataSourceProtocol {
+class LocalStorageDataSource<T: Storable>: LocalStorageDataSourceProtocol {
     typealias Entity = T
     private let storageKey: String
     private let userDefaults = UserDefaults.standard
@@ -47,5 +47,17 @@ final class LocalStorageDataSource<T: Storable>: LocalStorageDataSourceProtocol 
             entities[index] = entity
             saveEntities(entities)
         }
+    }
+}
+
+class MockLocalStorageDataSource<T: Storable>: LocalStorageDataSource<T> {
+    var storedEntities: [T] = []
+    
+    override func loadEntities() -> [T] {
+        return storedEntities
+    }
+    
+    override func saveEntities(_ entities: [T]) {
+        storedEntities = entities
     }
 }

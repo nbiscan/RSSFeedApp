@@ -1,33 +1,33 @@
+////
+////  RSS_Feed_AppUITestsLaunchTests.swift
+////  RSS Feed AppUITests
+////
+////  Created by Natko Biscan on 14.10.2024..
+////
 //
-//  RSS_Feed_AppUITestsLaunchTests.swift
-//  RSS Feed AppUITests
+//import XCTest
 //
-//  Created by Natko Biscan on 14.10.2024..
+//final class RSS_Feed_AppUITestsLaunchTests: XCTestCase {
 //
-
-import XCTest
-
-final class RSS_Feed_AppUITestsLaunchTests: XCTestCase {
-
-    override class var runsForEachTargetApplicationUIConfiguration: Bool {
-        true
-    }
-
-    override func setUpWithError() throws {
-        continueAfterFailure = false
-    }
-
-    @MainActor
-    func testLaunch() throws {
-        let app = XCUIApplication()
-        app.launch()
-
-        // Insert steps here to perform after app launch but before taking a screenshot,
-        // such as logging into a test account or navigating somewhere in the app
-
-        let attachment = XCTAttachment(screenshot: app.screenshot())
-        attachment.name = "Launch Screen"
-        attachment.lifetime = .keepAlways
-        add(attachment)
-    }
-}
+//    override class var runsForEachTargetApplicationUIConfiguration: Bool {
+//        true
+//    }
+//
+//    override func setUpWithError() throws {
+//        continueAfterFailure = false
+//    }
+//
+//    @MainActor
+//    func testLaunch() throws {
+//        let app = XCUIApplication()
+//        app.launch()
+//
+//        // Insert steps here to perform after app launch but before taking a screenshot,
+//        // such as logging into a test account or navigating somewhere in the app
+//
+//        let attachment = XCTAttachment(screenshot: app.screenshot())
+//        attachment.name = "Launch Screen"
+//        attachment.lifetime = .keepAlways
+//        add(attachment)
+//    }
+//}

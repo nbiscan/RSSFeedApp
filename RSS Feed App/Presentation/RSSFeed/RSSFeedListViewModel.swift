@@ -93,6 +93,7 @@ final class RSSFeedListViewModel: ObservableObject {
         do {
             let result = try await addRSSFeedUseCase.execute(url: url)
             feeds.insert(.init(from: result), at: 0)
+            isShowingFavorites = false
         } catch {
             alertItem = AlertItem(message: error.localizedDescription)
         }
@@ -106,12 +107,10 @@ final class RSSFeedListViewModel: ObservableObject {
         }
     }
     
-    func toggleFavorite(with url: URL) {
+    func toggleFavorite(with url: URL) async {
         guard let index = feeds.firstIndex(where: { $0.url == url }) else { return }
         
-        Task {
-            await toggleFavoriteFeedUseCase.execute(feedURL: url)
-        }
+        await toggleFavoriteFeedUseCase.execute(feedURL: url)
         
         withAnimation(.default) {
             feeds[index].isFavorite.toggle()

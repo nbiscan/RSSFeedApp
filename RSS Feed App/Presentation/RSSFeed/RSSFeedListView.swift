@@ -101,7 +101,9 @@ struct RSSFeedListView: View {
                     RSSFeedCard(feed: feed)
                         .swipeActions(edge: .leading, allowsFullSwipe: true) {
                             Button {
-                                viewModel.toggleFavorite(with: feed.url)
+                                Task {
+                                    await viewModel.toggleFavorite(with: feed.url)
+                                }
                             } label: {
                                 Label(feed.isFavorite ? "Unfavorite" : "Favorite",
                                       systemImage: feed.isFavorite ? "star.fill" : "star")

@@ -13,7 +13,9 @@ final class RSSFeedDetailsViewModel: ObservableObject {
     var feed: RSSFeed?
     var notificationsEnabled: Bool = false {
         didSet {
-            toggleNotifications()
+            Task {
+                await toggleNotifications()
+            }
         }
     }
     var loading: Bool = false
@@ -33,15 +35,22 @@ final class RSSFeedDetailsViewModel: ObservableObject {
     
     func loadFeedDetails() async {
         loading = true
-        feed = await getRSSFeedDetailsUseCase.execute(feedURL: feedURL)
-        notificationsEnabled = feed?.notificationsEnabled ?? false
-        loading = false
+        defer {
+            loading = false
+        }
+                
+        do {
+            let fetchedFeed = try await getRSSFeedDetailsUseCase.execute(feedURL: feedURL)
+            
+            notificationsEnabled = fetchedFeed.notificationsEnabled
+            feed = fetchedFeed
+        } catch {
+            alertItem = .init(message: error.localizedDescription)
+        }
     }
     
-    private func toggleNotifications() {
-        guard let feed = feed else { return }
-        Task {
-            await toggleNotificationsUseCase.execute(feedURL: feed.url, enable: notificationsEnabled)
-        }
+    private func toggleNotifications() async {
+        guard let feed else { return }
+        await toggleNotificationsUseCase.execute(feedURL: feed.url, enable: notificationsEnabled)
     }
 }

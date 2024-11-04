@@ -33,7 +33,7 @@ protocol ToggleNotificationsUseCaseProtocol {
 }
 
 protocol GetRSSFeedDetailsUseCaseProtocol {
-    func execute(feedURL: URL) async -> RSSFeed?
+    func execute(feedURL: URL) async throws -> RSSFeed
 }
 
 protocol GetRSSFeedListUseCaseProtocol {
@@ -51,8 +51,8 @@ final class GetRSSFeedListUseCase: GetRSSFeedListUseCaseProtocol {
 final class GetRSSFeedDetailsUseCase: GetRSSFeedDetailsUseCaseProtocol {
     let repository = RSSFeedRepository.shared
 
-    func execute(feedURL: URL) async -> RSSFeed? {
-        return await repository.getFeedDetails(feedURL: feedURL)
+    func execute(feedURL: URL) async throws -> RSSFeed {
+        return try await repository.getFeedDetails(feedURL: feedURL)
     }
 }
 final class AddRSSFeedUseCase: AddRSSFeedUseCaseProtocol {
@@ -118,7 +118,7 @@ final class MockRemoveRSSFeedUseCase: RemoveRSSFeedUseCaseProtocol {
 }
 
 final class MockGetRSSFeedListUseCase: GetRSSFeedListUseCaseProtocol {
-    var result: [RSSListItem] = []
+    var result: [RSSListItem] = [.mock]
     func execute() -> [RSSListItem] {
         return result
     }
@@ -129,9 +129,8 @@ final class MockToggleFavoriteFeedUseCase: ToggleFavoriteFeedUseCaseProtocol {
 }
 
 final class MockGetRSSFeedDetailsUseCase: GetRSSFeedDetailsUseCaseProtocol {
-    var result: RSSFeed?
-    
-    func execute(feedURL: URL) async -> RSSFeed? {
+    var result: RSSFeed = .mock
+    func execute(feedURL: URL) async throws -> RSSFeed {
         return result
     }
 }

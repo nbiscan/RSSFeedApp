@@ -27,6 +27,7 @@
 		02A199372CBD40200009257C /* RSS Feed App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "RSS Feed App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		02A199472CBD40220009257C /* RSS Feed AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "RSS Feed AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		02A199512CBD40220009257C /* RSS Feed AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "RSS Feed AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		02CDACB22CD8F58600DB2134 /* RSS Feed App.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "RSS Feed App.xctestplan"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -75,6 +76,7 @@
 		02A1992E2CBD40200009257C = {
 			isa = PBXGroup;
 			children = (
+				02CDACB22CD8F58600DB2134 /* RSS Feed App.xctestplan */,
 				02A199392CBD40200009257C /* RSS Feed App */,
 				02A1994A2CBD40220009257C /* RSS Feed AppTests */,
 				02A199542CBD40220009257C /* RSS Feed AppUITests */,

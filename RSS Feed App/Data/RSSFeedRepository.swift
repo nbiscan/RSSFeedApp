@@ -57,7 +57,7 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
     }
     
     func getFeedDetails(feedURL: URL) async throws -> RSSFeed {
-        var localFeed = dataSource.loadEntities().first { $0.url == feedURL }
+        let localFeed = dataSource.loadEntities().first { $0.url == feedURL }
         let remoteFeed = try await rssFeedService.fetchFeed(from: feedURL)
         
         var mergedFeed = remoteFeed
@@ -73,7 +73,7 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
                 feeds.append(mergedFeed)
             }
         }
-
+        
         return mergedFeed
     }
 

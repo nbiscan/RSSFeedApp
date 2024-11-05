@@ -15,6 +15,11 @@ struct RSSFeedListView: View {
             VStack {
                 header
                 
+                Button("Simulate Notification") {
+                    RSSBackgroundManager.shared.simulateNotification(withDelay: 5)
+                           }
+                           .padding()
+                
                 if viewModel.shouldShowEmptyState {
                     Spacer()
                     

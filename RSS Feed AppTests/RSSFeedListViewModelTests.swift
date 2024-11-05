@@ -52,7 +52,7 @@ final class RSSFeedListViewModelTests: XCTestCase {
     }
     
     func testAddFeedInsertsFeedAtTop() async throws {
-        let newFeedURL = "https://example.com/feed.xml"
+        let newFeedURL = Constants.testingRSSURL
         let newFeed = RSSFeed.mock
         viewModel.newFeedURL = newFeedURL
         mockAddFeedUseCase.result = newFeed

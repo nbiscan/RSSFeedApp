@@ -26,7 +26,7 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
     static let shared = RSSFeedRepository()
     
     init(service: RSSFeedServiceProtocol = RSSFeedService(),
-                 dataSource: LocalStorageDataSource<RSSFeed> = LocalStorageDataSource(storageKey: "savedFeeds")) {
+         dataSource: LocalStorageDataSource<RSSFeed> = LocalStorageDataSource(storageKey: Constants.storageKey)) {
         self.rssFeedService = service
         self.dataSource = dataSource
     }

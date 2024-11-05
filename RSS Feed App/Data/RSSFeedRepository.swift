@@ -57,17 +57,24 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
     }
     
     func getFeedDetails(feedURL: URL) async throws -> RSSFeed {
-        let latestFeed = try await rssFeedService.fetchFeed(from: feedURL)
+        var localFeed = dataSource.loadEntities().first { $0.url == feedURL }
+        let remoteFeed = try await rssFeedService.fetchFeed(from: feedURL)
+        
+        var mergedFeed = remoteFeed
+        if let localFeed {
+            mergedFeed.notificationsEnabled = localFeed.notificationsEnabled
+            mergedFeed.isFavorite = localFeed.isFavorite
+        }
         
         updateFeeds { feeds in
             if let index = feeds.firstIndex(where: { $0.url == feedURL }) {
-                feeds[index] = latestFeed
+                feeds[index] = mergedFeed
             } else {
-                feeds.append(latestFeed)
+                feeds.append(mergedFeed)
             }
         }
-        
-        return latestFeed
+
+        return mergedFeed
     }
 
     func getRSSFeedListItems() -> [RSSListItem] {

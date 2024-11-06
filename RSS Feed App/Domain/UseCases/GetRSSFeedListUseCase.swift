@@ -18,10 +18,14 @@ extension GetRSSFeedListUseCaseProtocol {
 }
 
 final class GetRSSFeedListUseCase: GetRSSFeedListUseCaseProtocol {
-    private let repository: RSSFeedRepositoryProtocol = RSSFeedRepository.shared
+    private let repository: RSSFeedRepositoryProtocol
+    
+    init(repository: RSSFeedRepositoryProtocol = RSSFeedRepository.shared) {
+        self.repository = repository
+    }
 
     func execute() -> [RSSListItem] {
-        return repository.getFeedListItems()
+        return repository.getLocalFeeds().map { .init(from: $0) }
     }
 }
 

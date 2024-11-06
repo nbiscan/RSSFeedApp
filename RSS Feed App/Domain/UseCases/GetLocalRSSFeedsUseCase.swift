@@ -18,7 +18,11 @@ extension GetLocalRSSFeedsUseCaseProtocol {
 }
 
 final class GetLocalRSSFeedsUseCase: GetLocalRSSFeedsUseCaseProtocol {
-    let repository = RSSFeedRepository.shared
+    private let repository: RSSFeedRepositoryProtocol
+    
+    init(repository: RSSFeedRepositoryProtocol = RSSFeedRepository.shared) {
+        self.repository = repository
+    }
 
     func execute() -> [RSSFeed] {
         return repository.getLocalFeeds()

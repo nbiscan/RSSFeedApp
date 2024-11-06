@@ -50,11 +50,11 @@ class RSSFeedRepositoryTests: XCTestCase {
         XCTAssertTrue(mockDataSource.storedEntities.isEmpty)
     }
     
-    func testGetFeeds() async {
+    func testGetLocalFeeds() async {
         let expectedFeeds = [RSSFeed.mock]
         mockDataSource.storedEntities = expectedFeeds
         
-        let feeds = await repository.getFeeds()
+        let feeds = repository.getLocalFeeds()
         
         XCTAssertEqual(feeds, expectedFeeds)
     }

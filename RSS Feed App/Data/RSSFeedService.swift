@@ -9,6 +9,7 @@ import Foundation
 
 protocol RSSFeedServiceProtocol {
     func fetchFeed(from url: URL) async throws -> RSSFeed
+    func fetchAllFeeds(from urls: [URL]) async throws -> [RSSFeed]
 }
 
 final class RSSFeedService: NSObject, RSSFeedServiceProtocol {
@@ -46,6 +47,24 @@ final class RSSFeedService: NSObject, RSSFeedServiceProtocol {
             notificationsEnabled: false,
             items: items
         )
+    }
+    
+    func fetchAllFeeds(from urls: [URL]) async throws -> [RSSFeed] {
+        var feeds: [RSSFeed] = []
+        
+        try await withThrowingTaskGroup(of: RSSFeed.self) { group in
+            for url in urls {
+                group.addTask {
+                    return try await self.fetchFeed(from: url)
+                }
+            }
+            
+            for try await feed in group {
+                feeds.append(feed)
+            }
+        }
+        
+        return feeds
     }
     
     private func fetchData(from url: URL) async throws -> Data {
@@ -142,6 +161,7 @@ extension RSSFeedService: XMLParserDelegate {
 
 class MockRSSFeedService: RSSFeedServiceProtocol {
     var feedToReturn: RSSFeed?
+    var feedsToReturn: [RSSFeed] = [.mock]
     var errorToThrow: Error?
     
     func fetchFeed(from url: URL) async throws -> RSSFeed {
@@ -149,5 +169,12 @@ class MockRSSFeedService: RSSFeedServiceProtocol {
             throw error
         }
         return feedToReturn ?? RSSFeed.mock
+    }
+    
+    func fetchAllFeeds(from urls: [URL]) async throws -> [RSSFeed] {
+        if let error = errorToThrow {
+            throw error
+        }
+        return feedsToReturn.isEmpty ? [RSSFeed.mock] : feedsToReturn
     }
 }

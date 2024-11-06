@@ -11,7 +11,8 @@ import UserNotifications
 protocol RSSFeedRepositoryProtocol {
     func addFeed(url: URL) async throws -> RSSFeed
     func removeFeed(url: URL)
-    func getFeeds() async -> [RSSFeed]
+    func getLocalFeeds() -> [RSSFeed]
+    func getRemoteFeeds() async throws -> [RSSFeed]
     func getFeedDetails(feedURL: URL) async throws -> RSSFeed
     func getFeedListItems() -> [RSSListItem]
     func getFeedItems(feedURL: URL) async throws -> [RSSItem]
@@ -52,10 +53,17 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
         }
     }
     
-    func getFeeds() async -> [RSSFeed] {
+    func getLocalFeeds() -> [RSSFeed] {
         return dataSource.loadEntities()
     }
     
+    func getRemoteFeeds() async throws -> [RSSFeed] {
+        let localFeeds = dataSource.loadEntities()
+        let urls = localFeeds.map { $0.url }
+        
+        return try await rssFeedService.fetchAllFeeds(from: urls)
+    }
+
     func getFeedDetails(feedURL: URL) async throws -> RSSFeed {
         let localFeed = dataSource.loadEntities().first { $0.url == feedURL }
         let remoteFeed = try await rssFeedService.fetchFeed(from: feedURL)

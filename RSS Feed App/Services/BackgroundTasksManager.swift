@@ -64,7 +64,7 @@ final class BackgroundTasksManager: BackgroundTaskManagerProtocol {
         scheduleFeedRefresh()
         
         let repository = RSSFeedRepository.shared
-        let feeds = await repository.getFeeds().filter { $0.notificationsEnabled }
+        let feeds = repository.getLocalFeeds().filter { $0.notificationsEnabled }
         
         for feed in feeds {
             do {

@@ -26,7 +26,7 @@ extension RSSFeed {
             title: "Mock Title",
             description: "Mock Description",
             imageUrl: nil,
-            url: .init(string: Constants.testingRSSURL)!,
+            url: .init(string: Constants.URLs.testingRSSURL)!,
             isFavorite: false,
             notificationsEnabled: false,
             items: [.mock])

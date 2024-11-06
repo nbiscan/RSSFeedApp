@@ -9,13 +9,35 @@ import Foundation
 import BackgroundTasks
 import UserNotifications
 
-final class RSSBackgroundManager {
-    static let shared = RSSBackgroundManager()
+protocol BackgroundTaskManagerProtocol {
+    func registerTasks()
+    func registerBackgroundTasks()
+    func scheduleFeedRefresh()
+    func handleFeedRefreshTask(task: BGAppRefreshTask) async
+}
+
+final class BackgroundTasksManager: BackgroundTaskManagerProtocol {
+    static let shared = BackgroundTasksManager()
     
     private init() {}
     
+    func registerTasks() {
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: Constants.BackgroundTasks.feedRefreshIdentifier,
+                                        using: nil) { task in
+            guard let appRefreshTask = task as? BGAppRefreshTask else {
+                task.setTaskCompleted(success: false)
+                return
+            }
+            
+            Task {
+                await self.handleRefreshTask(task: appRefreshTask)
+            }
+        }
+    }
+    
     func registerBackgroundTasks() {
-        BGTaskScheduler.shared.register(forTaskWithIdentifier: "com.natkobiscan.RSS-Feed-App.refreshFeeds", using: nil) { task in
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: Constants.BackgroundTasks.feedRefreshIdentifier,
+                                        using: nil) { task in
             guard let appRefreshTask = task as? BGAppRefreshTask else {
                 task.setTaskCompleted(success: false)
                 return
@@ -31,8 +53,6 @@ final class RSSBackgroundManager {
         let testFeed = RSSFeed.mock
         let newItems = [RSSItem.mock]
         
-        print("Simulating notification with a \(seconds) second delay.")
-        
         DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
             self.sendNotification(for: testFeed, newItems: newItems)
         }
@@ -42,12 +62,12 @@ final class RSSBackgroundManager {
     func simulateNotification() {
         let testFeed = RSSFeed.mock
         let newItems = [RSSItem.mock]
-        print("Simulating notification for \(testFeed.title) with \(newItems.count) new items.")
+        
         sendNotification(for: testFeed, newItems: newItems)
     }
     
     func scheduleFeedRefresh() {
-        let request = BGAppRefreshTaskRequest(identifier: "com.natkobiscan.RSS-Feed-App.refreshFeeds")
+        let request = BGAppRefreshTaskRequest(identifier: Constants.BackgroundTasks.feedRefreshIdentifier)
         request.earliestBeginDate = Date(timeIntervalSinceNow: 20 * 60)
         do {
             try BGTaskScheduler.shared.submit(request)
@@ -106,5 +126,9 @@ final class RSSBackgroundManager {
                 print("Notification scheduled successfully for \(delay) seconds delay.")
             }
         }
+    }
+    
+    private func handleRefreshTask(task: BGAppRefreshTask) async {
+        task.setTaskCompleted(success: true)
     }
 }

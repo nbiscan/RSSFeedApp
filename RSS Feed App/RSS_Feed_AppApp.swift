@@ -13,34 +13,22 @@ struct RSS_Feed_AppApp: App {
     @Environment(\.scenePhase) private var scenePhase
     
     init() {
-        requestNotificationPermission()
-        UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
-        RSSBackgroundManager.shared.registerBackgroundTasks()
+        NotificationsManager.shared.requestPermission()
+        NotificationsManager.shared.setDelegate()
+        BackgroundTasksManager.shared.registerTasks()
     }
     
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .onAppear {
-                    RSSBackgroundManager.shared.scheduleFeedRefresh()
+                    BackgroundTasksManager.shared.scheduleFeedRefresh()
                 }
                 .onChange(of: scenePhase) {
                     if scenePhase == .background {
-                        RSSBackgroundManager.shared.scheduleFeedRefresh()
+                        BackgroundTasksManager.shared.scheduleFeedRefresh()
                     }
                 }
-        }
-    }
-    
-    private func requestNotificationPermission() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
-            if let error {
-                print("Error requesting notification authorization: \(error)")
-            } else if granted {
-                print("Notification permission granted.")
-            } else {
-                print("Notification permission denied.")
-            }
         }
     }
 }

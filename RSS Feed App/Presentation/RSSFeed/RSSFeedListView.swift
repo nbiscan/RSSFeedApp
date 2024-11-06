@@ -16,7 +16,7 @@ struct RSSFeedListView: View {
                 header
                 
                 Button("Simulate Notification") {
-                    RSSBackgroundManager.shared.simulateNotification(withDelay: 5)
+                    BackgroundTasksManager.shared.simulateNotification(withDelay: 5)
                            }
                            .padding()
                 

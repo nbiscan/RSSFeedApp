@@ -29,7 +29,7 @@ class RSSFeedRepositoryTests: XCTestCase {
     }
     
     func testAddFeed() async throws {
-        let url = URL(string: Constants.testingRSSURL)!
+        let url = URL(string: Constants.URLs.testingRSSURL)!
         let expectedFeed = RSSFeed.mock
         mockService.feedToReturn = expectedFeed
         
@@ -42,7 +42,7 @@ class RSSFeedRepositoryTests: XCTestCase {
     }
     
     func testRemoveFeed() {
-        let url = URL(string: Constants.testingRSSURL)!
+        let url = URL(string: Constants.URLs.testingRSSURL)!
         mockDataSource.storedEntities = [RSSFeed.mock]
         
         repository.removeFeed(url: url)
@@ -60,7 +60,7 @@ class RSSFeedRepositoryTests: XCTestCase {
     }
     
     func testGetFeedDetailsUpdatesStoredFeed() async throws {
-        let url = URL(string: Constants.testingRSSURL)!
+        let url = URL(string: Constants.URLs.testingRSSURL)!
         let updatedFeed = RSSFeed.mock
         mockService.feedToReturn = updatedFeed
         mockDataSource.storedEntities = [RSSFeed.mock]
@@ -72,7 +72,7 @@ class RSSFeedRepositoryTests: XCTestCase {
     }
     
     func testToggleFavoriteFeed() async {
-        let url = URL(string: Constants.testingRSSURL)!
+        let url = URL(string: Constants.URLs.testingRSSURL)!
         var feed = RSSFeed.mock
         feed.isFavorite = false
         mockDataSource.storedEntities = [feed]
@@ -87,7 +87,7 @@ class RSSFeedRepositoryTests: XCTestCase {
     }
     
     func testToggleNotificationsToTrue() async throws {
-        let url = URL(string: Constants.testingRSSURL)!
+        let url = URL(string: Constants.URLs.testingRSSURL)!
         var feed = RSSFeed.mock
         feed.notificationsEnabled = false
         mockDataSource.storedEntities = [feed]
@@ -102,7 +102,7 @@ class RSSFeedRepositoryTests: XCTestCase {
     }
     
     func testToggleNotificationsToFalse() async throws {
-        let url = URL(string: Constants.testingRSSURL)!
+        let url = URL(string: Constants.URLs.testingRSSURL)!
         var feed = RSSFeed.mock
         feed.notificationsEnabled = false
         mockDataSource.storedEntities = [feed]

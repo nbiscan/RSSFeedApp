@@ -11,6 +11,12 @@ protocol ToggleFavoriteFeedUseCaseProtocol {
     func execute(feedURL: URL) async
 }
 
+extension ToggleFavoriteFeedUseCaseProtocol {
+    func callAsFunction(feedURL: URL) async {
+        await execute(feedURL: feedURL)
+    }
+}
+
 final class ToggleFavoriteFeedUseCase: ToggleFavoriteFeedUseCaseProtocol {
     let repository = RSSFeedRepository.shared
 

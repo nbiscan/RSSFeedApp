@@ -11,6 +11,12 @@ protocol ToggleNotificationsUseCaseProtocol {
     func execute(feedURL: URL, enable: Bool) async
 }
 
+extension ToggleNotificationsUseCaseProtocol {
+    func callAsFunction(feedURL: URL, enable: Bool) async {
+        await execute(feedURL: feedURL, enable: enable)
+    }
+}
+
 final class ToggleNotificationsUseCase: ToggleNotificationsUseCaseProtocol {
     let repository = RSSFeedRepository.shared
 

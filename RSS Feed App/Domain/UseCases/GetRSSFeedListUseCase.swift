@@ -11,6 +11,12 @@ protocol GetRSSFeedListUseCaseProtocol {
     func execute() -> [RSSListItem]
 }
 
+extension GetRSSFeedListUseCaseProtocol {
+    func callAsFunction() -> [RSSListItem] {
+        execute()
+    }
+}
+
 final class GetRSSFeedListUseCase: GetRSSFeedListUseCaseProtocol {
     private let repository: RSSFeedRepositoryProtocol = RSSFeedRepository.shared
 

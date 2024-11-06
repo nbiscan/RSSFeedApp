@@ -11,6 +11,12 @@ protocol GetRSSFeedItemsUseCaseProtocol {
     func execute(feedURL: URL) async throws -> [RSSItem]
 }
 
+extension GetRSSFeedItemsUseCaseProtocol {
+    func callAsFunction(feedURL: URL) async throws -> [RSSItem] {
+        try await execute(feedURL: feedURL)
+    }
+}
+
 final class GetRSSFeedItemsUseCase: GetRSSFeedItemsUseCaseProtocol {
     let repository = RSSFeedRepository.shared
 

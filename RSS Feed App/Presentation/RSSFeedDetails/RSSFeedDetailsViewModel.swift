@@ -40,7 +40,7 @@ final class RSSFeedDetailsViewModel: ObservableObject {
         }
                 
         do {
-            let fetchedFeed = try await getRSSFeedDetailsUseCase.execute(feedURL: feedURL)
+            let fetchedFeed = try await getRSSFeedDetailsUseCase(feedURL: feedURL)
             
             notificationsEnabled = fetchedFeed.notificationsEnabled
             feed = fetchedFeed
@@ -51,6 +51,6 @@ final class RSSFeedDetailsViewModel: ObservableObject {
     
     private func toggleNotifications() async {
         guard let feed else { return }
-        await toggleNotificationsUseCase.execute(feedURL: feed.url, enable: notificationsEnabled)
+        await toggleNotificationsUseCase(feedURL: feed.url, enable: notificationsEnabled)
     }
 }

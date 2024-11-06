@@ -45,18 +45,18 @@ final class RSSFeedListViewModel: ObservableObject {
     
     private let addRSSFeedUseCase: AddRSSFeedUseCaseProtocol
     private let removeRSSFeedUseCase: RemoveRSSFeedUseCaseProtocol
-    private let getRSSFeedsUseCase: GetRSSFeedListUseCaseProtocol
+    private let getRSSFeedListUseCase: GetRSSFeedListUseCaseProtocol
     private let getRSSFeedItemsUseCase: GetRSSFeedItemsUseCaseProtocol
     private let toggleFavoriteFeedUseCase: ToggleFavoriteFeedUseCaseProtocol
     
     init(addRSSFeedUseCase: AddRSSFeedUseCaseProtocol = AddRSSFeedUseCase(),
          removeRSSFeedUseCase: RemoveRSSFeedUseCaseProtocol = RemoveRSSFeedUseCase(),
-         getRSSFeedsUseCase: GetRSSFeedListUseCaseProtocol = GetRSSFeedListUseCase(),
+         getRSSFeedListUseCase: GetRSSFeedListUseCaseProtocol = GetRSSFeedListUseCase(),
          getRSSFeedItemsUseCase: GetRSSFeedItemsUseCaseProtocol = GetRSSFeedItemsUseCase(),
          toggleFavoriteFeedUseCase: ToggleFavoriteFeedUseCaseProtocol = ToggleFavoriteFeedUseCase()) {
         self.addRSSFeedUseCase = addRSSFeedUseCase
         self.removeRSSFeedUseCase = removeRSSFeedUseCase
-        self.getRSSFeedsUseCase = getRSSFeedsUseCase
+        self.getRSSFeedListUseCase = getRSSFeedListUseCase
         self.getRSSFeedItemsUseCase = getRSSFeedItemsUseCase
         self.toggleFavoriteFeedUseCase = toggleFavoriteFeedUseCase
     }
@@ -69,8 +69,7 @@ final class RSSFeedListViewModel: ObservableObject {
             loading = false
         }
         
-        feeds = getRSSFeedsUseCase.execute()
-       
+        feeds = getRSSFeedListUseCase()
     }
     
     func addFeed() async {
@@ -91,7 +90,7 @@ final class RSSFeedListViewModel: ObservableObject {
         }
         
         do {
-            let result = try await addRSSFeedUseCase.execute(url: url)
+            let result = try await addRSSFeedUseCase(url: url)
             feeds.insert(.init(from: result), at: 0)
             isShowingFavorites = false
         } catch {
@@ -100,7 +99,7 @@ final class RSSFeedListViewModel: ObservableObject {
     }
     
     func removeFeed(with url: URL) {
-        removeRSSFeedUseCase.execute(feedURL: url)
+        removeRSSFeedUseCase(feedURL: url)
         
         withAnimation(.default) {
             feeds.removeAll { $0.url == url }
@@ -110,7 +109,7 @@ final class RSSFeedListViewModel: ObservableObject {
     func toggleFavorite(with url: URL) async {
         guard let index = feeds.firstIndex(where: { $0.url == url }) else { return }
         
-        await toggleFavoriteFeedUseCase.execute(feedURL: url)
+        await toggleFavoriteFeedUseCase(feedURL: url)
         
         withAnimation(.default) {
             feeds[index].isFavorite.toggle()

@@ -82,26 +82,28 @@ final class RSSBackgroundManager {
         task.setTaskCompleted(success: true)
     }
     
-    private func sendNotification(for feed: RSSFeed, newItems: [RSSItem]) {
+    private func sendNotification(for feed: RSSFeed, newItems: [RSSItem], after delay: TimeInterval = 5) {
         let content = UNMutableNotificationContent()
         content.title = "New items in \(feed.title)"
-        if newItems.count == 1 {
-            content.body = "There is 1 new item in your subscribed feed."
-        } else {
-            content.body = "There are \(newItems.count) new items in your subscribed feed."
-        }
+        content.body = newItems.count == 1
+        ? "There is 1 new item in your subscribed feed."
+        : "There are \(newItems.count) new items in your subscribed feed."
         content.sound = .default
         content.userInfo = ["feedURL": feed.url.absoluteString]
+        
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: delay, repeats: false)
         
         let request = UNNotificationRequest(
             identifier: "\(feed.identifier)-newItems",
             content: content,
-            trigger: nil
+            trigger: trigger
         )
         
         UNUserNotificationCenter.current().add(request) { error in
             if let error {
                 print("Failed to schedule notification: \(error)")
+            } else {
+                print("Notification scheduled successfully for \(delay) seconds delay.")
             }
         }
     }

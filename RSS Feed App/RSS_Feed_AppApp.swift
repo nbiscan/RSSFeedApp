@@ -34,7 +34,7 @@ struct RSS_Feed_AppApp: App {
     
     private func requestNotificationPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
-            if let error = error {
+            if let error {
                 print("Error requesting notification authorization: \(error)")
             } else if granted {
                 print("Notification permission granted.")

@@ -15,7 +15,7 @@ final class GetRSSFeedListUseCase: GetRSSFeedListUseCaseProtocol {
     private let repository: RSSFeedRepositoryProtocol = RSSFeedRepository.shared
 
     func execute() -> [RSSListItem] {
-        return repository.getRSSFeedListItems()
+        return repository.getFeedListItems()
     }
 }
 

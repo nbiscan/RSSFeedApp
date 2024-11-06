@@ -13,7 +13,7 @@ protocol RSSFeedRepositoryProtocol {
     func removeFeed(url: URL)
     func getFeeds() async -> [RSSFeed]
     func getFeedDetails(feedURL: URL) async throws -> RSSFeed
-    func getRSSFeedListItems() -> [RSSListItem]
+    func getFeedListItems() -> [RSSListItem]
     func getFeedItems(feedURL: URL) async throws -> [RSSItem]
     func toggleFavoriteFeed(feedURL: URL) async
     func toggleNotifications(feedURL: URL, enable: Bool) async
@@ -77,7 +77,7 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
         return mergedFeed
     }
 
-    func getRSSFeedListItems() -> [RSSListItem] {
+    func getFeedListItems() -> [RSSListItem] {
         return dataSource.loadEntities().map { .init(from: $0) }
     }
     

@@ -20,7 +20,7 @@ enum NetworkError: LocalizedError {
         case .invalidResponse:
             return "The server returned an invalid response. Please try again later."
         case .invalidData:
-            return "Failed to load data. Please check your internet connection or try again later."
+            return "Failed to load data. Please check your internet connection or try with another URL."
         case .parsingError:
             return "There was an issue parsing the feed. Please try again with another URL."
         }

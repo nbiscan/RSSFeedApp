@@ -26,7 +26,7 @@ final class RSSFeedListViewModelTests: XCTestCase {
         viewModel = RSSFeedListViewModel(
             addRSSFeedUseCase: mockAddFeedUseCase,
             removeRSSFeedUseCase: mockRemoveFeedUseCase,
-            getRSSFeedsUseCase: mockGetFeedsUseCase,
+            getRSSFeedListUseCase: mockGetFeedsUseCase,
             toggleFavoriteFeedUseCase: mockToggleFavoriteUseCase
         )
     }

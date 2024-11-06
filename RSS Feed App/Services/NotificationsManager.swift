@@ -7,7 +7,12 @@
 
 import UserNotifications
 
-final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
+protocol NotificationManagerProtocol {
+    func requestPermission()
+    func setDelegate()
+}
+
+final class NotificationsManager: NSObject, NotificationManagerProtocol, UNUserNotificationCenterDelegate {
     static let shared = NotificationsManager()
     
     private override init() {
@@ -28,9 +33,5 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
     
     func setDelegate() {
         UNUserNotificationCenter.current().delegate = self
-    }
-    
-    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        completionHandler([.banner, .sound])
     }
 }

@@ -49,23 +49,6 @@ final class BackgroundTasksManager: BackgroundTaskManagerProtocol {
         }
     }
     
-    func simulateNotification(withDelay seconds: TimeInterval = 5) {
-        let testFeed = RSSFeed.mock
-        let newItems = [RSSItem.mock]
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
-            self.sendNotification(for: testFeed, newItems: newItems)
-        }
-    }
-    
-    
-    func simulateNotification() {
-        let testFeed = RSSFeed.mock
-        let newItems = [RSSItem.mock]
-        
-        sendNotification(for: testFeed, newItems: newItems)
-    }
-    
     func scheduleFeedRefresh() {
         let request = BGAppRefreshTaskRequest(identifier: Constants.BackgroundTasks.feedRefreshIdentifier)
         request.earliestBeginDate = Date(timeIntervalSinceNow: 20 * 60)
@@ -130,5 +113,23 @@ final class BackgroundTasksManager: BackgroundTaskManagerProtocol {
     
     private func handleRefreshTask(task: BGAppRefreshTask) async {
         task.setTaskCompleted(success: true)
+    }
+    
+    // Testing methods
+    
+    func simulateNotification(withDelay seconds: TimeInterval = 5) {
+        let testFeed = RSSFeed.mock
+        let newItems = [RSSItem.mock]
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
+            self.sendNotification(for: testFeed, newItems: newItems)
+        }
+    }
+    
+    func simulateNotification() {
+        let testFeed = RSSFeed.mock
+        let newItems = [RSSItem.mock]
+        
+        sendNotification(for: testFeed, newItems: newItems)
     }
 }

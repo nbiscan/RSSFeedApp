@@ -38,6 +38,7 @@ class LocalStorageDataSource<T: Storable>: LocalStorageDataSourceProtocol {
               let entities = try? JSONDecoder().decode([T].self, from: data) else {
             return []
         }
+        
         return entities
     }
     

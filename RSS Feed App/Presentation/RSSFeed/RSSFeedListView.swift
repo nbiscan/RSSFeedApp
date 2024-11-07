@@ -11,46 +11,46 @@ struct RSSFeedListView: View {
     @State private var viewModel: RSSFeedListViewModel = .init()
     
     var body: some View {
-        NavigationStack {
-            VStack {
-                header
+        VStack {
+            header
+            
+            //                For testing notifications:
+            //
+            //                Button("Simulate Notification") {
+            //                    BackgroundTasksManager.shared.simulateNotification(withDelay: 5)
+            //                }
+            //                .padding()
+            
+            if viewModel.shouldShowEmptyState {
+                Spacer()
                 
-                Button("Simulate Notification") {
-                    BackgroundTasksManager.shared.simulateNotification(withDelay: 5)
-                           }
-                           .padding()
-                
-                if viewModel.shouldShowEmptyState {
-                    Spacer()
-                    
-                    if viewModel.isShowingFavorites {
-                        favoritesEmptyState
-                    } else if !viewModel.hasFeeds {
-                        emptyState
-                    } else {
-                        noSearchResultsState
-                    }
-                    
-                    Spacer()
+                if viewModel.isShowingFavorites {
+                    favoritesEmptyState
+                } else if !viewModel.hasFeeds {
+                    emptyState
                 } else {
-                    list
+                    noSearchResultsState
                 }
+                
+                Spacer()
+            } else {
+                list
             }
-            .isLoading(viewModel.loading)
-            .alert(item: $viewModel.alertItem) { alertItem in
-                Alert(
-                    title: Text("Error"),
-                    message: Text(alertItem.message),
-                    dismissButton: .default(Text("OK")) {
-                        viewModel.alertItem = nil
-                    }
-                )
-            }
-            .task {
-                await viewModel.loadFeeds()
-            }
-            .navigationTitle("Your RSS Feeds")
         }
+        .isLoading(viewModel.loading)
+        .alert(item: $viewModel.alertItem) { alertItem in
+            Alert(
+                title: Text("Error"),
+                message: Text(alertItem.message),
+                dismissButton: .default(Text("OK")) {
+                    viewModel.alertItem = nil
+                }
+            )
+        }
+        .task {
+            await viewModel.loadFeeds()
+        }
+        .navigationTitle("Your RSS Feeds")
     }
     
     @ViewBuilder
@@ -102,7 +102,7 @@ struct RSSFeedListView: View {
     private var list: some View {
         List {
             ForEach(viewModel.filteredFeeds, id: \.id) { feed in
-                NavigationLink(destination: RSSFeedDetailsView(feedURL: feed.url)) {
+                NavigationLink(value: NavigationDestination.rssFeedDetails(RSSFeedDetailsViewModel(feedURL: feed.url))) {
                     RSSFeedCard(feed: feed)
                         .swipeActions(edge: .leading, allowsFullSwipe: true) {
                             Button {

@@ -35,7 +35,7 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
         let normalizedURL = url.normalized
         var currentFeeds = dataSource.loadEntities()
         
-        if currentFeeds.contains(where: { $0.url == normalizedURL }) {
+        guard !currentFeeds.contains(where: { $0.url == normalizedURL }) else {
             throw NetworkError.invalidURL
         }
         
@@ -62,16 +62,25 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
         
         return try await rssFeedService.fetchAllFeeds(from: urls)
     }
-
+    
     func getFeedDetails(feedURL: URL) async throws -> RSSFeed {
         let localFeed = dataSource.loadEntities().first { $0.url == feedURL }
         let remoteFeed = try await rssFeedService.fetchFeed(from: feedURL)
         
         var mergedFeed = remoteFeed
-        if let localFeed {
-            mergedFeed.notificationsEnabled = localFeed.notificationsEnabled
-            mergedFeed.isFavorite = localFeed.isFavorite
+        guard let localFeed else {
+            updateFeeds { feeds in
+                if let index = feeds.firstIndex(where: { $0.url == feedURL }) {
+                    feeds[index] = mergedFeed
+                } else {
+                    feeds.append(mergedFeed)
+                }
+            }
+            return mergedFeed
         }
+        
+        mergedFeed.notificationsEnabled = localFeed.notificationsEnabled
+        mergedFeed.isFavorite = localFeed.isFavorite
         
         updateFeeds { feeds in
             if let index = feeds.firstIndex(where: { $0.url == feedURL }) {
@@ -88,41 +97,39 @@ final class RSSFeedRepository: RSSFeedRepositoryProtocol {
         let latestFeed = try await rssFeedService.fetchFeed(from: feedURL)
         
         return updateFeeds { feeds in
-            if let index = feeds.firstIndex(where: { $0.url == feedURL }) {
-                let storedFeed = feeds[index]
-                
-                let newItems = latestFeed.items.filter { newItem in
-                    !storedFeed.items.contains(where: { $0.id == newItem.id })
-                }
-                
-                if !newItems.isEmpty {
-                    feeds[index].items.append(contentsOf: newItems)
-                }
-                
-                return feeds[index].items
-            } else {
+            guard let index = feeds.firstIndex(where: { $0.url == feedURL }) else {
                 feeds.append(latestFeed)
                 return latestFeed.items
             }
+            
+            let storedFeed = feeds[index]
+            let newItems = latestFeed.items.filter { newItem in
+                !storedFeed.items.contains(where: { $0.id == newItem.id })
+            }
+            
+            if !newItems.isEmpty {
+                feeds[index].items.append(contentsOf: newItems)
+            }
+            
+            return feeds[index].items
         }
     }
     
     func toggleFavoriteFeed(feedURL: URL) async {
         updateFeeds { feeds in
-            if let index = feeds.firstIndex(where: { $0.url == feedURL }) {
-                feeds[index].isFavorite.toggle()
-            }
+            guard let index = feeds.firstIndex(where: { $0.url == feedURL }) else { return }
+            feeds[index].isFavorite.toggle()
         }
     }
     
     func toggleNotifications(feedURL: URL, enable: Bool) async {
         updateFeeds { feeds in
-            if let index = feeds.firstIndex(where: { $0.url == feedURL }) {
-                feeds[index].notificationsEnabled = enable
-            }
+            guard let index = feeds.firstIndex(where: { $0.url == feedURL }) else { return }
+            feeds[index].notificationsEnabled = enable
         }
     }
 }
+
 
 extension RSSFeedRepository {
     @discardableResult

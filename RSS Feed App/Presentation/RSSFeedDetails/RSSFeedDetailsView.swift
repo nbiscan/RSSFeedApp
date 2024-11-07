@@ -7,12 +7,12 @@
 import SwiftUI
 
 struct RSSFeedDetailsView: View {
-    @StateObject private var viewModel: RSSFeedDetailsViewModel
+    @State private var viewModel: RSSFeedDetailsViewModel
     @State private var showMore: Bool = false
     @State private var isExpandable: Bool = false
     
-    init(feedURL: URL) {
-        _viewModel = StateObject(wrappedValue: RSSFeedDetailsViewModel(feedURL: feedURL))
+    init(rssFeedDetailsViewModel: RSSFeedDetailsViewModel) {
+        viewModel = rssFeedDetailsViewModel
     }
     
     var body: some View {
@@ -74,7 +74,7 @@ struct RSSFeedDetailsView: View {
                         }
                     }
                     .padding(.vertical, 8)
-                                        
+                    
                     Toggle("Enable Notifications", isOn: $viewModel.notificationsEnabled)
                         .padding(.horizontal)
                 }
@@ -98,7 +98,7 @@ struct RSSFeedDetailsView: View {
     
     @ViewBuilder
     private func itemCell(for item: RSSItem) -> some View {
-        NavigationLink(destination: WebView(url: item.link)) {
+        NavigationLink(value: NavigationDestination.webView(item.link)) {
             HStack(spacing: 12) {
                 if let imageUrl = item.imageUrl {
                     AsyncImage(url: imageUrl) { image in
@@ -131,5 +131,5 @@ struct RSSFeedDetailsView: View {
 }
 
 #Preview {
-    RSSFeedDetailsView(feedURL: RSSFeed.mock.url)
+    RSSFeedDetailsView(rssFeedDetailsViewModel: .init(feedURL: URL(string: Constants.URLs.testingRSSURL)!))
 }

@@ -54,3 +54,15 @@ final class RSSFeedDetailsViewModel: ObservableObject {
         await toggleNotificationsUseCase(feedURL: feed.url, enable: notificationsEnabled)
     }
 }
+
+extension RSSFeedDetailsViewModel: Equatable {
+    public static func == (lhs: RSSFeedDetailsViewModel, rhs: RSSFeedDetailsViewModel) -> Bool {
+        return lhs.feedURL == rhs.feedURL
+    }
+}
+
+extension RSSFeedDetailsViewModel: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(feedURL)
+    }
+}

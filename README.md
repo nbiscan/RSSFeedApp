@@ -35,3 +35,7 @@ We welcome contributions! Please follow these steps to submit a pull request:
 2. Create a new branch for your feature or bug fix.
 3. Commit your changes and push them to your branch.
 4. Open a pull request, describing the changes you’ve made.
+
+![Nov-13-2024 11-45-29](https://github.com/user-attachments/assets/e85d8f1a-1855-4ee1-bae5-81848c05268e)
+
+![IMG_4625](https://github.com/user-attachments/assets/e1d960ac-d0b5-4f07-8e47-994a26a82587)

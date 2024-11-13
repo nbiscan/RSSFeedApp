@@ -22,6 +22,11 @@ cd RSSFeedApp
    
 3. Run the App: Select a target device and click Run to build and launch the app.
 
+## Run Tests:
+To run all tests, select Product > Test or press ⌘ Command + U.
+
+To run a specific test, click the diamond icon next to the test or test class in the Test Navigator.
+
 ## Contributing
 
 We welcome contributions! Please follow these steps to submit a pull request:

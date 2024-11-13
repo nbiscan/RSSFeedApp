@@ -18,7 +18,7 @@ An RSS Feed app built with SwiftUI, following Clean Architecture and SOLID princ
 git clone https://github.com/nbiscan/RSSFeedApp.git
 cd RSSFeedApp
 ```
-2. Open in Xcode: Open `RSSFeedApp.xcodeproj` in Xcode.
+2. Open in Xcode: Open `RSS Feed App.xcodeproj` in Xcode.
    
 3. Run the App: Select a target device and click Run to build and launch the app.
 
